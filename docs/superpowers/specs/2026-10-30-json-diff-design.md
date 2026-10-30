@@ -22,7 +22,7 @@
 - 否决方案 B(摊平成 path→value map 再比):丢失树结构,展示合并树时需重建,更别扭
 - 否决方案 C(复用 IntelliJ DiffTreeBuilder/文本 diff):退化为按行文本 diff,会把 key 顺序等无关差异算进去,且强绑平台难单测,与"结构化差异"诉求冲突
 
-## 4. 数据模型(新增包 com.you.jsonformatter.compare,零 IDE 依赖)
+## 4. 数据模型(新增包 com.tidy.kit.compare,零 IDE 依赖)
 
     enum DiffStatus { EQUAL, ADDED, REMOVED, CHANGED, TYPE_DIFF }
 

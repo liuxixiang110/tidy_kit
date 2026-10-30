@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>com.you.jsonformatter</id>
+    <id>com.tidy.kit</id>
     <name>TidyKit</name>
     <vendor>you</vendor>
     <description><![CDATA[
@@ -14,6 +14,6 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="TidyKit"
                     anchor="right"
-                    factoryClass="com.you.jsonformatter.toolwindow.JsonFormatterToolWindowFactory"/>
+                    factoryClass="com.tidy.kit.toolwindow.JsonFormatterToolWindowFactory"/>
     </extensions>
 </idea-plugin>

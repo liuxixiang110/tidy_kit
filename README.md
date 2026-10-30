@@ -19,6 +19,10 @@
 
 2. 在 IDEA 里：`File → Settings → Plugins → ⚙（齿轮）→ Install Plugin from Disk...`，选中那个 zip。
 3. 重启 IDEA。
+
+   > 如果你之前装过旧包（插件 id 为 `com.you.jsonformatter`），**先在 `Settings → Plugins` 里把它卸载**再装新的。
+   > 当前包的插件 id 已改成 `com.tidy.kit`，IDEA 会当成另一个插件；
+   > 两个同时存在会出现两个同名的 TidyKit 工具窗口。
 4. 右侧边条出现 **TidyKit** 竖条，点它打开工具窗口（或 `View → Tool Windows → TidyKit`）。
 
 改代码后的日常循环：`buildPlugin` → 重启 IDEA（比每次跑 `runIde` 开两套窗口省事）。
@@ -76,11 +80,13 @@
 - 超过 200 000 字符的条目不入池，避免配置目录被撑爆；同内容重复入池只刷新时间不新增。
 - HTML/XML/URL 三个标签**不做历史**。
 
-## 内部标识（改名不会影响它们）
+## 内部标识
 
-插件显示名改成 TidyKit（历史上叫过 `JSON Tree Formatter` / `JSON Formatter` / `Formatter`），
-以下内部标识始终未变，所以历史记录和启用状态不受影响：插件 id `com.you.jsonformatter`、
-包名 `com.you.jsonformatter`、Gradle 构件名、历史文件名。
+- Java 包名与插件 id 均为 `com.tidy.kit`（历史上都叫 `com.you.jsonformatter`），Gradle `group` 同步。
+- 插件显示名历史上叫过 `JSON Tree Formatter` / `JSON Formatter` / `Formatter`，现为 **TidyKit**。
+- 历史记录存在 `json-formatter-history.xml`（`@State` 名为 `JsonFormatterHistory`），**与包名/插件名解耦**，
+  改名不会丢历史。
+- 类名仍带 JSON 味（`JsonFormatterTabs`、`JsonFormatterToolWindowFactory`），未随改名调整。
 
 ## 已知限制
 

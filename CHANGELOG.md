@@ -23,9 +23,14 @@
 
 ### 变更
 
-- 插件显示名：`JSON Tree Formatter` / `JSON Formatter` → `Formatter` → **`TidyKit`**。
-  内部标识（插件 id `com.you.jsonformatter`、包名、Gradle 构件名、历史文件名）全程未变，
-  历史记录与启用状态不受改名影响；只有 `workspace.xml` 里旧 toolWindow id 的停靠状态失效一次。
+- 插件显示名：`JSON Tree Formatter` / `JSON Formatter` → `Formatter` → **`TidyKit`**（三处耦合点：`<name>`、
+  `<toolWindow id>`（即右侧竖条显示名）、工厂里 `createContent` 的标题）。
+- **包名与插件 id：`com.you.jsonformatter` → `com.tidy.kit`**，同步修正 `plugin.xml` 的 `factoryClass` 与
+  Gradle `group`。历史存在 `json-formatter-history.xml`（`@State` 名 `JsonFormatterHistory`），
+  不依赖包名，因此改包名不丢历史。代价：插件 id 变了，IDEA 视为另一个插件，
+  装新包前先卸载旧的，否则会出现两个同名 TidyKit 工具窗口。
+- Gradle 构件名与历史文件名未变（zip 仍叫 `json-tree-formatter-0.1.0.zip`，文件名取自项目名）；
+  类名仍为 `JsonFormatterTabs` / `JsonFormatterToolWindowFactory`，未随改名调整。
 - 顶部原 `+` 按钮改名 `JSON格式化`，语义不变（新建一个 JSON 标签）。
 - 标签页命名从 `JSON n` 改为按功能命名（`JSON格式化 n` / `JSON对比 n`，HTML/XML/URL 取短式）。
 - 状态栏着色与剪贴板复制从 4 个面板里的重复实现抽成包私有 `ui/UiFeedback`。

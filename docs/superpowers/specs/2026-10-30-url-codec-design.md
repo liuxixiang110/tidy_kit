@@ -18,7 +18,7 @@
 
 ## 3. 架构
 
-    src/main/java/com/you/jsonformatter/
+    src/main/java/com/tidy/kit/
     |- codec/  UrlCodec(encode / decode,纯静态,零依赖)
     |- ui/     UrlCodecPanel / JsonFormatterTabs
 

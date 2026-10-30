@@ -20,7 +20,7 @@
 
 ## 3. 架构
 
-    src/main/java/com/you/jsonformatter/
+    src/main/java/com/tidy/kit/
     |- format/  TextFormatter(接口) / HtmlFormatter / XmlFormatter / FormatterException
     |- ui/      TextFormatPanel(HTML 与 XML 共用) / JsonFormatterTabs(按钮与标签注册)
 

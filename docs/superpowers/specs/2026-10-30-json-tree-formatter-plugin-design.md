@@ -27,7 +27,7 @@
     json-tree-formatter/
     |- build.gradle / settings.gradle
     |- src/main/resources/META-INF/plugin.xml
-    |- src/main/java/com/you/jsonformatter/
+    |- src/main/java/com/tidy/kit/
         |- model/        JsonNodeModel
         |- parse/        JsonParseService / StrictParser / LenientParser / JsonParseException
         |- ui/           JsonTree / JsonTreeCellRenderer / JsonTreePanel
