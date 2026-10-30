@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij' version '1.17.4'
+}
+
+group = 'com.you.jsonformatter'
+version = '0.1.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        // 本机可用 JDK：IDEA 自带 JBR 21（PATH 里的 JDK 11 太老，不满足平台要求）
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+// 2024.1 平台要求字节码兼容 Java 17
+// 源码编码必须写死 UTF-8:不指定的话 javac 跟随 daemon 默认字符集,
+// 中文 Windows 上 daemon 换成老 JDK 启动就会把中文注释和中文界面文案读成乱码而编译失败
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+intellij {
+    version = '2024.1.4'
+    type = 'IC'
+    plugins = ['com.intellij.java']
+}
+
+tasks {
+    patchPluginXml {
+        sinceBuild = '241'
+        untilBuild = '251.*'
+    }
+    buildSearchableOptions {
+        enabled = false
+    }
+}

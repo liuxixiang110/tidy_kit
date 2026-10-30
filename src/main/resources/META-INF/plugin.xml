@@ -1,0 +1,19 @@
+<idea-plugin>
+    <id>com.you.jsonformatter</id>
+    <name>TidyKit</name>
+    <vendor>you</vendor>
+    <description><![CDATA[
+        Text formatting toolkit: JSON tree view with strict / lenient parsing and escaped-JSON extraction,
+        JSON diff, HTML / XML re-indenting and URL percent encode / decode.
+        All features open as tabs in one tool window, results one-click copyable.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="TidyKit"
+                    anchor="right"
+                    factoryClass="com.you.jsonformatter.toolwindow.JsonFormatterToolWindowFactory"/>
+    </extensions>
+</idea-plugin>
