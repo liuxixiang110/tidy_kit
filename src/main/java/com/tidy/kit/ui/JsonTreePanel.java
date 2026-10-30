@@ -54,7 +54,7 @@ public class JsonTreePanel extends JPanel {
         // 顶部:输入区 + 控制行
         // 换行以保证单行长 JSON 能自由拖选(不换行时拖选会横向自动滚动并把光标甩到行尾)
         inputArea.setLineWrap(true);
-        inputArea.setFont(JsonUiColors.editorFont());
+        inputArea.setFont(UiColors.editorFont());
         JBScrollPane inputScroll = new JBScrollPane(inputArea);
         inputScroll.setPreferredSize(new Dimension(10, 140));
 

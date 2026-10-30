@@ -20,7 +20,7 @@
 
     src/main/java/com/tidy/kit/
     |- codec/  UrlCodec(encode / decode,纯静态,零依赖)
-    |- ui/     UrlCodecPanel / JsonFormatterTabs
+    |- ui/     UrlCodecPanel / TidyKitTabs
 
 新包 `codec` 与 `format`、`parse` 同级:不 import Swing 与 com.intellij,可脱离 IDE 单测。
 `UrlCodec` 无状态、不抛异常 —— 这是有意的(见 5.2),面板因此不需要 try/catch 与错误着色分支。
@@ -70,7 +70,7 @@ RFC 3986 百分号编码,固定 UTF-8:
 - 状态着色与剪贴板复制走包私有 `ui/UiFeedback`,不在本面板重复实现
 - 两个文本区都换行(不换行时拖选会膨胀到行尾,是本项目踩过的坑)
 
-注册在 `JsonFormatterTabs`:新增 `urlCounter` 与 `addUrlTab(boolean focus)`,内部走公共
+注册在 `TidyKitTabs`:新增 `urlCounter` 与 `addUrlTab(boolean focus)`,内部走公共
 `addTab(panel, title, focus)`,自动挂上带 `×` 的标签头。
 
 ## 7. 测试

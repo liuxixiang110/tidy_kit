@@ -20,7 +20,7 @@ class JsonTreeCellRenderer extends DefaultTreeCellRenderer {
         setLeafIcon(null);
         setClosedIcon(null);
         setOpenIcon(null);
-        setFont(JsonUiColors.editorFont());
+        setFont(UiColors.editorFont());
     }
 
     @Override
@@ -28,7 +28,7 @@ class JsonTreeCellRenderer extends DefaultTreeCellRenderer {
                                                   boolean expanded, boolean leaf, int row,
                                                   boolean hasFocus) {
         super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-        Font font = JsonUiColors.editorFont();
+        Font font = UiColors.editorFont();
         setFont(font);
         if (value instanceof JsonTreeNode node) {
             setText(buildHtml(node.getModel(), expanded));
@@ -41,33 +41,33 @@ class JsonTreeCellRenderer extends DefaultTreeCellRenderer {
     private String buildHtml(JsonNodeModel m, boolean expanded) {
         StringBuilder sb = new StringBuilder("<html>");
         if (m.getKey() != null) {
-            sb.append(color(JsonUiColors.key(), escape(m.getKey())));
-            sb.append(color(JsonUiColors.punctuation(), ":"));
+            sb.append(color(UiColors.key(), escape(m.getKey())));
+            sb.append(color(UiColors.punctuation(), ":"));
             sb.append(' ');
         }
         switch (m.getType()) {
             case OBJECT:
             case ARRAY:
                 if (expanded) {
-                    sb.append(color(JsonUiColors.punctuation(),
+                    sb.append(color(UiColors.punctuation(),
                             m.getType() == NodeType.OBJECT ? "{ }" : "[ ]"));
                 } else {
-                    sb.append(color(JsonUiColors.comment(), escape(m.collapsedSummary())));
+                    sb.append(color(UiColors.comment(), escape(m.collapsedSummary())));
                 }
                 break;
             case STRING:
-                sb.append(color(JsonUiColors.string(), escape("\"" + m.getTextValue() + "\"")));
+                sb.append(color(UiColors.string(), escape("\"" + m.getTextValue() + "\"")));
                 if (m.getEscapedInner() != null) {
                     // 宽松模式成功解析内层转义 JSON,可再展开为子树(见 JsonTree)
-                    sb.append(' ').append(color(JsonUiColors.comment(), "(escaped JSON)"));
+                    sb.append(' ').append(color(UiColors.comment(), "(escaped JSON)"));
                 }
                 break;
             case NUMBER:
-                sb.append(color(JsonUiColors.number(), escape(m.getTextValue())));
+                sb.append(color(UiColors.number(), escape(m.getTextValue())));
                 break;
             case BOOLEAN:
             case NULL:
-                sb.append(color(JsonUiColors.constant(), escape(m.getTextValue())));
+                sb.append(color(UiColors.constant(), escape(m.getTextValue())));
                 break;
             default:
                 break;

@@ -22,7 +22,7 @@
 
     src/main/java/com/tidy/kit/
     |- format/  TextFormatter(接口) / HtmlFormatter / XmlFormatter / FormatterException
-    |- ui/      TextFormatPanel(HTML 与 XML 共用) / JsonFormatterTabs(按钮与标签注册)
+    |- ui/      TextFormatPanel(HTML 与 XML 共用) / TidyKitTabs(按钮与标签注册)
 
 `format` 包只依赖 JDK,不 import Swing 与 com.intellij,可脱离 IDE 单测(与 `parse`/`compare`/`codec` 同一分层原则)。
 `TextFormatter` 是无状态单方法接口:
@@ -80,7 +80,7 @@
   横向自动滚动,选中区间被膨胀成"光标到末尾全选"
 - 空输入显示引导文案,不算错误;失败时结果区清空并把异常消息打到状态栏(红色)
 
-标签注册在 `JsonFormatterTabs`:顶部按钮 `HTML格式化` / `XML格式化`,标题取短式 `HTML n` / `XML n`
+标签注册在 `TidyKitTabs`:顶部按钮 `HTML格式化` / `XML格式化`,标题取短式 `HTML n` / `XML n`
 (全称会把标签栏撑挤),各自独立计数器。
 
 ## 7. 测试

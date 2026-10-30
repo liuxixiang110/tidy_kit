@@ -23,7 +23,7 @@ class JsonTree extends JTree {
 
     /** 字体变化时(Dark/Light 切换、方案调整)重算行高 */
     void applyFontAndRowHeight() {
-        Font font = JsonUiColors.editorFont();
+        Font font = UiColors.editorFont();
         setFont(font);
         FontMetrics fm = getFontMetrics(font);
         setRowHeight(fm.getHeight() + 2);

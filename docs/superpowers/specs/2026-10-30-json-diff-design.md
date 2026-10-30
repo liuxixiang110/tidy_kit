@@ -13,7 +13,7 @@
 - 对比语义:结构化差异(按 key 路径逐项),非文本按行 diff
 - 顺序处理:对象 key 忽略书写顺序(按 key 匹配);数组按下标逐位比较
 - 展现形态:单棵合并差异树,每行显示 `左值 → 右值`,颜色区分状态;默认只展开有差异的分支
-- 入口:同一工具窗口(`JsonFormatterTabs`)顶部新增"对比"按钮,新开对比标签,与格式化标签混排
+- 入口:同一工具窗口(`TidyKitTabs`)顶部新增"对比"按钮,新开对比标签,与格式化标签混排
 - 技术栈与分层:沿用现有 Java + Gradle + 纯 Java 解析层可脱离 IDE 单测的约定
 
 ## 3. 方案选型
@@ -54,7 +54,7 @@
 
 ## 6. UI 层
 
-- 入口:`JsonFormatterTabs` 顶部工具条在"＋"右侧新增"对比"按钮 -> 新开对比标签(命名 `对比 1/2…`,可关闭,至少保留一个标签)
+- 入口:`TidyKitTabs` 顶部工具条在"＋"右侧新增"对比"按钮 -> 新开对比标签(命名 `对比 1/2…`,可关闭,至少保留一个标签)
 - 对比标签面板 `JsonDiffPanel`(复用 JsonTreePanel 的输入/状态下栏风格):
   - 上半:左右两个输入区(输入 A / 输入 B)并排,共用一个 `ParseMode` 下拉 + `[对比]` 按钮
   - 中部:单棵合并差异树,复用 `JsonTree` 大纲风格 + 新增 `JsonDiffCellRenderer`
@@ -86,7 +86,7 @@
 
 1. compare 层(DiffStatus/DiffNode/JsonDiffService)+ 单测
 2. UI:JsonDiffPanel + JsonDiffCellRenderer(差异树渲染)
-3. 接入 JsonFormatterTabs"对比"按钮与标签
+3. 接入 TidyKitTabs"对比"按钮与标签
 4. 错误处理与体验收尾(状态摘要、宽松重试、默认展开调校)
 
 ## 10. 环境备注

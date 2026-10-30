@@ -88,8 +88,8 @@ public class JsonDiffPanel extends JPanel {
     }
 
     private void buildUi() {
-        inputA.setFont(JsonUiColors.editorFont());
-        inputB.setFont(JsonUiColors.editorFont());
+        inputA.setFont(UiColors.editorFont());
+        inputB.setFont(UiColors.editorFont());
         // 必须换行:单行长 JSON 在不换行的 JTextArea 里拖选会触发横向自动滚动,
         // 光标被甩到行尾,导致选中区间膨胀成"光标到末尾全选"
         inputA.setLineWrap(true);

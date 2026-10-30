@@ -29,8 +29,13 @@
   Gradle `group`。历史存在 `json-formatter-history.xml`（`@State` 名 `JsonFormatterHistory`），
   不依赖包名，因此改包名不丢历史。代价：插件 id 变了，IDEA 视为另一个插件，
   装新包前先卸载旧的，否则会出现两个同名 TidyKit 工具窗口。
-- Gradle 构件名与历史文件名未变（zip 仍叫 `json-tree-formatter-0.1.0.zip`，文件名取自项目名）；
-  类名仍为 `JsonFormatterTabs` / `JsonFormatterToolWindowFactory`，未随改名调整。
+- 插件级类去掉 JSON 味：`JsonFormatterToolWindowFactory` → `TidyKitToolWindowFactory`、
+  `JsonFormatterTabs` → `TidyKitTabs`（同步 `plugin.xml` 的 `factoryClass`），
+  `JsonUiColors` → `UiColors`（HTML/XML 面板也在用它）。只处理 JSON 的类
+  （`JsonTreePanel` / `JsonDiffPanel` / `JsonParseService` / `JsonHistoryStore` 等）保留原名。
+- Gradle 项目名 `json-tree-formatter` → `tidy-kit`，产物 zip 相应改叫 `tidy-kit-0.1.0.zip`。
+- 历史存储键刻意不动：`@State` 名 `JsonFormatterHistory` 与文件 `json-formatter-history.xml`
+  属于遗留命名，改它会丢已存的历史。
 - 顶部原 `+` 按钮改名 `JSON格式化`，语义不变（新建一个 JSON 标签）。
 - 标签页命名从 `JSON n` 改为按功能命名（`JSON格式化 n` / `JSON对比 n`，HTML/XML/URL 取短式）。
 - 状态栏着色与剪贴板复制从 4 个面板里的重复实现抽成包私有 `ui/UiFeedback`。

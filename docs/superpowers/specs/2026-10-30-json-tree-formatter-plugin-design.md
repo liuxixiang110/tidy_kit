@@ -31,7 +31,7 @@
         |- model/        JsonNodeModel
         |- parse/        JsonParseService / StrictParser / LenientParser / JsonParseException
         |- ui/           JsonTree / JsonTreeCellRenderer / JsonTreePanel
-        |- toolwindow/   JsonFormatterToolWindowFactory
+        |- toolwindow/   TidyKitToolWindowFactory
         |- action/       FormatJsonInEditorAction
 
 分层原则:model 零依赖;parse 只依赖 model;ui 只依赖 model;action/toolwindow 是薄壳。解析层不 import 任何 com.intellij 类,可脱离 IDE 单测。
@@ -54,7 +54,7 @@
 - 性能:children > 5000 的节点默认折叠懒展开;节点总数 > 10 万提示切纯文本模式
 
 ### 5.4 动作层
-- JsonFormatterToolWindowFactory:侧边 ToolWindow,内容即 JsonTreePanel,启动时自动填入剪贴板内容(可关)
+- TidyKitToolWindowFactory:侧边 ToolWindow,内容即 JsonTreePanel,启动时自动填入剪贴板内容(可关)
 - FormatJsonInEditorAction:编辑器右键 + Ctrl+Alt+J,选中文本 -> Dialog 内嵌 JsonTreePanel;提供"原地替换为格式化文本"
 
 数据流:展示 = 输入 -> parse -> JsonNodeModel -> JsonTree;格式化 = 输入 -> parse -> toPrettyString(缩进 2 空格) -> 复制/回写。

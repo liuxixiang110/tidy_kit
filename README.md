@@ -11,11 +11,13 @@
 1. 打包：
 
    ```powershell
-   .\gradlew.bat clean buildPlugin
+   .\gradlew.bat buildPlugin
    ```
 
-   产物在 `build\distributions\json-tree-formatter-0.1.0.zip`（zip 文件名取自 Gradle 项目名，
-   不随插件显示名变化）。
+   产物在 `build\distributions\tidy-kit-0.1.0.zip`（zip 文件名取自 Gradle 项目名）。
+
+   > **不要加 `clean`**：沙盒实例的配置与历史存在 `build\idea-sandbox\config\` 里，`clean` 会一并删掉。
+   > 需要全量重编时用 `--rerun-tasks`。
 
 2. 在 IDEA 里：`File → Settings → Plugins → ⚙（齿轮）→ Install Plugin from Disk...`，选中那个 zip。
 3. 重启 IDEA。
@@ -86,7 +88,10 @@
 - 插件显示名历史上叫过 `JSON Tree Formatter` / `JSON Formatter` / `Formatter`，现为 **TidyKit**。
 - 历史记录存在 `json-formatter-history.xml`（`@State` 名为 `JsonFormatterHistory`），**与包名/插件名解耦**，
   改名不会丢历史。
-- 类名仍带 JSON 味（`JsonFormatterTabs`、`JsonFormatterToolWindowFactory`），未随改名调整。
+- 插件级的类已改成中性名：`TidyKitToolWindowFactory`（工具窗口入口）、`TidyKitTabs`（标签容器）、
+  `UiColors`（跨功能共用的取色/字体）。仍带 `Json` 前缀的类（`JsonTreePanel`、`JsonDiffPanel`、
+  `JsonParseService`、`JsonHistoryStore` 等）确实只处理 JSON，保留原名。
+- Gradle 项目名改为 `tidy-kit`，产物 zip 随之叫 `tidy-kit-0.1.0.zip`；工作区目录名（json-tree-formatter）未改。
 
 ## 已知限制
 

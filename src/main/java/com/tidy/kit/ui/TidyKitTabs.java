@@ -16,11 +16,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 
 /**
- * 工具窗口内的多标签容器:顶部四个按钮分别新建
- * JSON格式化 / JSON对比 / HTML格式化 / XML格式化 标签,每个标签带 "×" 可关闭。
+ * 工具窗口内的多标签容器:顶部五个按钮分别新建
+ * JSON格式化 / JSON对比 / URL编码/解码 / HTML格式化 / XML格式化 标签,每个标签带 "×" 可关闭。
  * 按钮行用 FlowLayout,工具窗口很窄时会自然换行。
  */
-public class JsonFormatterTabs extends JPanel {
+public class TidyKitTabs extends JPanel {
 
     private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
     private int formatCounter = 0;
@@ -29,7 +29,7 @@ public class JsonFormatterTabs extends JPanel {
     private int htmlCounter = 0;
     private int xmlCounter = 0;
 
-    public JsonFormatterTabs() {
+    public TidyKitTabs() {
         super(new BorderLayout());
         setBorder(JBUI.Borders.empty());
 

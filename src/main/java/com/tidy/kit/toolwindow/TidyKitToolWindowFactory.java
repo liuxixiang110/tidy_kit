@@ -5,17 +5,17 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
-import com.tidy.kit.ui.JsonFormatterTabs;
+import com.tidy.kit.ui.TidyKitTabs;
 import com.tidy.kit.ui.JsonTreePanel;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.datatransfer.DataFlavor;
 
-public class JsonFormatterToolWindowFactory implements ToolWindowFactory {
+public class TidyKitToolWindowFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        JsonFormatterTabs tabs = new JsonFormatterTabs();
+        TidyKitTabs tabs = new TidyKitTabs();
         JsonTreePanel first = tabs.firstPanel();
         if (first != null) {
             prefillFromClipboard(first);

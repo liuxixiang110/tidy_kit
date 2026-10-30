@@ -52,8 +52,8 @@ public class TextFormatPanel extends JPanel {
         // 两个文本区都必须换行:不换行时单行超长内容会破坏鼠标拖选(横向自动滚动把光标甩到行尾)
         inputArea.setLineWrap(true);
         outputArea.setLineWrap(true);
-        inputArea.setFont(JsonUiColors.editorFont());
-        outputArea.setFont(JsonUiColors.editorFont());
+        inputArea.setFont(UiColors.editorFont());
+        outputArea.setFont(UiColors.editorFont());
         outputArea.setEditable(false);
         outputArea.setToolTipText("格式化结果;可全选后自行复制,或用右下角\"复制结果\"");
 

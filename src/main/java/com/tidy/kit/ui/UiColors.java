@@ -12,9 +12,9 @@ import java.awt.Font;
  * 统一从 IDE 当前色彩/字体方案取值,自动适配 Dark/Light(设计 5.3)。
  * 取不到对应 ColorKey 时回退到 JBColor,保证不抛异常。
  */
-final class JsonUiColors {
+final class UiColors {
 
-    private JsonUiColors() {
+    private UiColors() {
     }
 
     /** key:用局部变量(标识符)色 */

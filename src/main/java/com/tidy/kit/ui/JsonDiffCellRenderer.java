@@ -25,14 +25,14 @@ class JsonDiffCellRenderer extends DefaultTreeCellRenderer {
         setLeafIcon(null);
         setClosedIcon(null);
         setOpenIcon(null);
-        setFont(JsonUiColors.editorFont());
+        setFont(UiColors.editorFont());
     }
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected,
                                                   boolean expanded, boolean leaf, int row, boolean hasFocus) {
         super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-        setFont(JsonUiColors.editorFont());
+        setFont(UiColors.editorFont());
         if (value instanceof DiffTreeNode node) {
             setText(buildHtml(node.getDiff()));
         } else {
@@ -47,9 +47,9 @@ class JsonDiffCellRenderer extends DefaultTreeCellRenderer {
         sb.append(color(statusColor(d.getStatus()), escape(marker(d.getStatus())) + " "));
         // key 或下标
         if (d.getKey() != null) {
-            sb.append(color(JsonUiColors.key(), escape(d.getKey()))).append(": ");
+            sb.append(color(UiColors.key(), escape(d.getKey()))).append(": ");
         } else if (d.getIndex() != null) {
-            sb.append(color(JsonUiColors.punctuation(), "[" + d.getIndex() + "]")).append(" ");
+            sb.append(color(UiColors.punctuation(), "[" + d.getIndex() + "]")).append(" ");
         }
 
         if (d.isContainer()) {

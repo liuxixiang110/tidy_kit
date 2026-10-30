@@ -28,7 +28,7 @@ class JsonDiffTree extends JTree {
     }
 
     void applyFontAndRowHeight() {
-        Font font = JsonUiColors.editorFont();
+        Font font = UiColors.editorFont();
         setFont(font);
         FontMetrics fm = getFontMetrics(font);
         setRowHeight(fm.getHeight() + 2);
