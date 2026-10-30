@@ -1,9 +1,10 @@
 # TidyKit
 
-一个自用 IntelliJ IDEA / GoLand 插件：把杂乱的文本收拾干净。一个工具窗口里用标签承载多类小工具，
-结果都能一键复制。
+一个自用的 IntelliJ 家族插件（IDEA / GoLand / DataGrip 等）：把杂乱的文本收拾干净。
+一个工具窗口里用标签承载多类小工具，结果都能一键复制。
 
-- 目标平台：IDEA 2024.1+（IC / IU 均可，`sinceBuild 241`，`untilBuild 251.*`）
+- 兼容区间：build **241 ~ 262.***（2024.1 ~ 2026.2），在 `build.gradle` 的 `patchPluginXml` 里配
+- 只依赖 `com.intellij.modules.platform`，不碰 PSI，所以不带 Java 插件的 IDE（DataGrip）也能装
 - 分发方式：本地打包 + Install Plugin from Disk，**不发布 Marketplace**
 
 ## 安装
@@ -20,6 +21,9 @@
    > 需要全量重编时用 `--rerun-tasks`。
 
 2. 在 IDEA 里：`File → Settings → Plugins → ⚙（齿轮）→ Install Plugin from Disk...`，选中那个 zip。
+
+   GoLand / DataGrip 同理；手工落盘时插件目录是 `%APPDATA%\JetBrains\<产品><版本>\plugins\`
+   （例如 `IntelliJIdea2024.3`、`GoLand2026.2`、`DataGrip2026.1`）。
 3. 重启 IDEA。
 
    > 如果你之前装过旧包（插件 id 为 `com.you.jsonformatter`），**先在 `Settings → Plugins` 里把它卸载**再装新的。
@@ -101,6 +105,8 @@
 - HTML/XML 没有严格/宽松开关（各自的容错策略写死在格式化器里）。
 - XML 的 mixed content（段落里夹标签）空白有语义，不做特判也不重排。
 - 无快捷键、无自定义设置页。
+- 兼容区间放宽到 262.* 后，真实运行只在 IDEA 上验证过；GoLand / DataGrip 属于
+  “元数据允许安装”，首次使用建议先拿小文档跑一遍。
 
 ## 开发
 

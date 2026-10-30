@@ -35,6 +35,7 @@ test {
 }
 
 intellij {
+    // 只是编译期用的平台(决定 API 版本与下载哪份 SDK);产物能装进哪些 IDE 由下面 patchPluginXml 的区间决定
     version = '2024.1.4'
     type = 'IC'
     plugins = ['com.intellij.java']
@@ -42,8 +43,10 @@ intellij {
 
 tasks {
     patchPluginXml {
+        // 241(2024.1) ~ 262.*(2026.2):覆盖 IDEA / GoLand / DataGrip 等所有 IntelliJ 家族 IDE。
+        // 升到 2027.x 再把 untilBuild 往上推一行;不写 '*' 是为了不兼容时报成清晰的“不适配”而不是运行期玄错。
         sinceBuild = '241'
-        untilBuild = '251.*'
+        untilBuild = '262.*'
     }
     buildSearchableOptions {
         enabled = false

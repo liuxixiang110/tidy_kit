@@ -19,6 +19,9 @@
 - **URL 编码/解码**（`codec/UrlCodec`）：RFC 3986 百分号编解码，固定 UTF-8，宽松解码。
 - **多标签**：每类功能可开多个标签并存，各自独立状态；标签头带 `×` 关闭（至少保留一个）。
 - 顶部按钮行：`JSON格式化` / `JSON对比` / `URL编码/解码` / `HTML格式化` / `XML格式化`。
+- 兼容区间 `241 ~ 262.*`（2024.1 ~ 2026.2），`plugin.xml` 只依赖 `com.intellij.modules.platform`：
+  源码未 import PSI/Java API，所以 GoLand、DataGrip 这些不带 Java 插件的 IDE 也能装
+  （原 `untilBuild = 251.*` + `<depends>com.intellij.modules.java</depends>` 会把它们挡在外面）。
 - 97 个纯逻辑层单测（不启 IDE 即可跑）。
 
 ### 变更

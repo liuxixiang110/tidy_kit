@@ -9,7 +9,8 @@
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.java</depends>
+    <!-- 只依赖 platform:源码仅 import com.intellij.openapi/ui/util,不碰 PSI。
+         一旦写上 com.intellij.modules.java,不带 Java 插件的 IDE(DataGrip 等)会直接判定不兼容。 -->
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="TidyKit"
