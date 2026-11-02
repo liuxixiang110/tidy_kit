@@ -9,7 +9,6 @@ import com.tidy.kit.format.XmlFormatter;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -18,11 +17,12 @@ import java.awt.FlowLayout;
 /**
  * 工具窗口内的多标签容器:顶部五个按钮分别新建
  * JSON格式化 / JSON对比 / URL编码/解码 / HTML格式化 / XML格式化 标签,每个标签带 "×" 可关闭。
+ * 标签头可按住左右拖动换顺序(见 ReorderableTabbedPane)。
  * 按钮行用 FlowLayout,工具窗口很窄时会自然换行。
  */
 public class TidyKitTabs extends JPanel {
 
-    private final JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+    private final ReorderableTabbedPane tabbedPane = new ReorderableTabbedPane();
     private int formatCounter = 0;
     private int diffCounter = 0;
     private int urlCounter = 0;
@@ -87,7 +87,9 @@ public class TidyKitTabs extends JPanel {
     private void addTab(JPanel panel, String title, boolean focus) {
         int index = tabbedPane.getTabCount();
         tabbedPane.addTab(title, panel);
-        tabbedPane.setTabComponentAt(index, buildTabHeader(title));
+        JPanel header = buildTabHeader(title);
+        tabbedPane.setTabComponentAt(index, header);
+        tabbedPane.installDragReorder(header);
         if (focus) {
             tabbedPane.setSelectedIndex(index);
         }
@@ -124,8 +126,9 @@ public class TidyKitTabs extends JPanel {
                 break;
             }
         }
-        // 至少保留一个标签
-        if (index > 0 && tabbedPane.getTabCount() > 1) {
+        // 任何标签都能关,包括最后一个(标签可拖拽换位后,"位置 0 不可关"这种按位置的限制已没意义);
+        // 全关掉只剩空面板也不要紧,顶部五个按钮随时能新建
+        if (index >= 0) {
             tabbedPane.removeTabAt(index);
         }
     }

@@ -23,7 +23,13 @@
 - **XML 格式化**（`format/XmlFormatter`）：JDK DOM + identity Transformer，严格报错（带行列号），
   `FEATURE_SECURE_PROCESSING` + 关闭外部 DTD/实体加载，声明与 DOCTYPE 按原文补回。
 - **URL 编码/解码**（`codec/UrlCodec`）：RFC 3986 百分号编解码，固定 UTF-8，宽松解码。
-- **多标签**：每类功能可开多个标签并存，各自独立状态；标签头带 `×` 关闭（至少保留一个）。
+- **多标签**：每类功能可开多个标签并存，各自独立状态；标签头带 `×` 关闭。
+- **标签拖拽换序**（`ui/ReorderableTabbedPane`）：标签头按住左右拖动即可换位置，越过相邻标签中线就实时换位。
+  `JTabbedPane` 没有 moveTab 这样的 API，所以把重排收成一个原语 `moveTab(from, to)`（取回 content/title/tabComponent
+  三个引用 → `remove(from)` → `insertTab(..., to)` → `setTabComponentAt`），拖拽手势只是它的触发器；
+  换位只改挂载关系，内容面板始终是同一个实例，输入文本与展开状态不受影响；选中按内容实例恢复，不按下标。
+  用手写拖拽而不用 AWT `DragSource`/`DropTarget`：实时重排会把正在拖的标签头 remove 再 add，与 DnD 会话冲突，
+  而且传一个下标还得为它写 `Transferable`。代价：没有跟随鼠标的拖拽影像。
 - 顶部按钮行：`JSON格式化` / `JSON对比` / `URL编码/解码` / `HTML格式化` / `XML格式化`。
 - **兼容 JetBrains 全家桶**：`plugin.xml` 只依赖 `com.intellij.modules.platform`（删掉了
   `<depends>com.intellij.modules.java</depends>`），`build.gradle` 的 `intellij.plugins` 也去掉了
@@ -34,10 +40,13 @@
   until-build 88.*”），正确写法是 `untilBuild.set(provider { null })`。
   代价：不设上限后，真遇到 API 不兼容时会是运行期报错而不是安装时的“不适配”提示。
 - 100 个纯逻辑层单测（不启 IDE 即可跑），后续补到 104 个（新增 4 条覆盖 `toPrettyValueString`，
-  其中一条拿"复制结果能被严格模式重新解析"当硬判据）。
+  其中一条拿"复制结果能被严格模式重新解析"当硬判据）；再加标签重排的下标用例后为 111 个。
 
 ### 变更
 
+- **标签不再强制保留一个**：原先 `closeTab` 写的是 `index > 0 && tabCount > 1`（位置 0 那个关不掉、永远至少剩一个）。
+  标签可以拖拽换位之后，“按位置”限制已没意义（初始标签被拖走就会换个标签占据位置 0），改成任何标签都能关，
+  全关掉就是一块空面板 —— 顶部五个按钮仍在，随时能新建。
 - **`JSON格式化` / `JSON对比` 的输入区高度改成可拖**：原先用 `setPreferredSize(new Dimension(10, 140/160))`
   写死，想把输入框拉大只能整个工具窗口拉高。换成 `JBSplitter(true, 0.4f)` 分隔输入区与结果区，
   与 `HTML格式化`/`XML格式化` 用的 `TextFormatPanel` 同一套做法（控制行仍贴在输入区下方）。
@@ -110,3 +119,4 @@
 - XML mixed content 空白不做特判；HTML 不规范化属性顺序/引号/大小写，不补 `tbody`/`head`。
 - URL 解码不支持 GBK 字符集，也不提供"把 `+` 当空格"的表单模式开关。
 - 无快捷键、无 Settings 页。
+- 标签顺序不持久化：只存在于当前会话，重启 IDE 后按新建顺序回到默认。

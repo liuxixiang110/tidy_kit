@@ -58,8 +58,13 @@
 - 性能:children > 5000 的节点默认折叠懒展开;节点总数 > 10 万提示切纯文本模式
 
 ### 5.4 动作层
-- TidyKitToolWindowFactory:侧边 ToolWindow,内容即 JsonTreePanel,启动时自动填入剪贴板内容(可关)
+- TidyKitToolWindowFactory:侧边 ToolWindow,内容即 `TidyKitTabs` 多标签容器;首个 JSON 标签自动填入剪贴板内容(可关)
 - FormatJsonInEditorAction:编辑器右键 + Ctrl+Alt+J,选中文本 -> Dialog 内嵌 JsonTreePanel;提供"原地替换为格式化文本"
+
+### 5.5 标签容器 TidyKitTabs
+- 顶部五个按钮新建五类标签,各自独立状态;标签头 = 标题 + `×`(尺寸锁死,避免新 UI 的隐形宽热区误触)
+- 任何标签都能关闭(含最后一个),不强制保留 —— 见 `2026-11-02-tidy-kit-tab-drag-reorder-design.md`
+- 标签头可拖拽换序:`ReorderableTabbedPane.moveTab(from, to)` 是唯一重排原语,手势只是触发器;顺序不持久化
 
 数据流:展示 = 输入 -> parse -> JsonNodeModel -> JsonTree;格式化 = 输入 -> parse -> toPrettyString(缩进 2 空格) -> 复制/回写。
 
