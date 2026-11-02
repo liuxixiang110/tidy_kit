@@ -3,6 +3,7 @@ package com.tidy.kit.ui;
 import com.tidy.kit.history.DiffHistoryEntry;
 import com.tidy.kit.history.HistoryEntry;
 import com.tidy.kit.history.JsonHistoryStore;
+import com.tidy.kit.parse.ParseMode;
 
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
@@ -109,7 +110,8 @@ final class HistoryPopup {
     }
 
     private static String modeLabel(String mode) {
-        return "LENIENT".equals(mode) ? "宽松" : "严格";
+        // 中文文案由 ParseMode 统一给出,历史里存的仍是枚举名
+        return ParseMode.labelOf(mode);
     }
 
     /** 折叠空白后的单行摘要 */
