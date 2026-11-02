@@ -102,13 +102,27 @@ public class JsonNodeModel {
     /** 以本节点为根序列化为美化 JSON(缩进 2 空格);内层转义 JSON 会展开 */
     public String toPrettyString() {
         StringBuilder sb = new StringBuilder();
-        appendPretty(sb, 0);
+        appendPretty(sb, 0, true, true);
         return sb.toString();
     }
 
-    private void appendPretty(StringBuilder sb, int level) {
+    /**
+     * 以本节点为根序列化为一份完整 JSON,供树上的右键复制使用。
+     * 与 toPrettyString 的两处差别都是为了"粘出去还能被解析":
+     * 1) 不输出本节点自身的 key,否则得到的是 "user": {...} 这样的片段,不是合法 JSON;
+     *    子节点不受影响,照常带自己的 key。
+     * 2) 整棵子树都不追加 (escaped JSON): 注释行,内层转义串按字符串原值输出。
+     *    那行注释是给人看的,混进复制结果里 JSON 就废了。
+     */
+    public String toPrettyValueString() {
+        StringBuilder sb = new StringBuilder();
+        appendPretty(sb, 0, false, false);
+        return sb.toString();
+    }
+
+    private void appendPretty(StringBuilder sb, int level, boolean selfKey, boolean annotateEscaped) {
         String pad = INDENT.repeat(level);
-        String keyPart = key == null ? "" : escapeString(key) + ": ";
+        String keyPart = selfKey && key != null ? escapeString(key) + ": " : "";
         switch (type) {
             case OBJECT:
             case ARRAY: {
@@ -120,7 +134,7 @@ public class JsonNodeModel {
                 char close = type == NodeType.OBJECT ? '}' : ']';
                 sb.append(pad).append(keyPart).append(open).append('\n');
                 for (int i = 0; i < children.size(); i++) {
-                    children.get(i).appendPretty(sb, level + 1);
+                    children.get(i).appendPretty(sb, level + 1, true, annotateEscaped);
                     sb.append(i < children.size() - 1 ? ",\n" : "\n");
                 }
                 sb.append(pad).append(close);
@@ -128,7 +142,7 @@ public class JsonNodeModel {
             }
             case STRING: {
                 sb.append(pad).append(keyPart).append(escapeString(textValue));
-                if (escapedInner != null) {
+                if (annotateEscaped && escapedInner != null) {
                     // 内层转义 JSON:换行展开,值以带缩进的字符串块呈现
                     String inline = replaceIndent(escapedInner, level);
                     sb.append(" (escaped JSON):\n").append(inline);

@@ -1,6 +1,7 @@
 package com.tidy.kit.ui;
 
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
@@ -21,12 +22,13 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 
 /**
  * 工具窗口与编辑器 Dialog 复用的主面板(设计 5.3)。
  * 布局:输入区 -> 控制行(模式/展开收起/宽松重试/历史) -> 树区 -> 状态栏 + [复制结果]。
  * 输入停止 300ms 自动解析渲染,不设"格式化"按钮;输入为空时结果区直接留空。
+ * 输入区与结果区之间用 JBSplitter 分隔,高度可拖(与 HTML/XML 面板一致)。
+ * 结果树上的右键可复制选中节点及其子树的完整 JSON。
  */
 public class JsonTreePanel extends JPanel {
 
@@ -50,7 +52,7 @@ public class JsonTreePanel extends JPanel {
     private final JButton historyButton = new JButton("历史 ▾");
     private final JButton copyButton = new JButton("复制结果");
     private final JBLabel statusLabel = new JBLabel(" ");
-    private final JsonTree tree = new JsonTree();
+    private final JsonTree tree = new JsonTree(msg -> setStatus(msg, false));
 
     private String lastPretty = "";
     /** 上一次真正用于解析的模式,用于识别下拉选项是否真的变了(与对比面板同一手法) */
@@ -69,7 +71,6 @@ public class JsonTreePanel extends JPanel {
         inputArea.setLineWrap(true);
         inputArea.setFont(UiColors.editorFont());
         JBScrollPane inputScroll = new JBScrollPane(inputArea);
-        inputScroll.setPreferredSize(new Dimension(10, 140));
 
         JPanel controlRow = new JPanel();
         controlRow.setLayout(new BoxLayout(controlRow, BoxLayout.X_AXIS));
@@ -87,13 +88,15 @@ public class JsonTreePanel extends JPanel {
         controlRow.add(historyButton);
         controlRow.add(Box.createHorizontalGlue());
 
-        JPanel north = new JPanel(new BorderLayout());
-        north.add(inputScroll, BorderLayout.CENTER);
-        north.add(controlRow, BorderLayout.SOUTH);
-        add(north, BorderLayout.NORTH);
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(inputScroll, BorderLayout.CENTER);
+        top.add(controlRow, BorderLayout.SOUTH);
 
-        // 中部:树
-        add(new JBScrollPane(tree), BorderLayout.CENTER);
+        // 输入区与结果树之间用可拖动分割条,高度不再写死;初始比例与 HTML/XML 面板一致
+        JBSplitter splitter = new JBSplitter(true, 0.4f);
+        splitter.setFirstComponent(top);
+        splitter.setSecondComponent(new JBScrollPane(tree));
+        add(splitter, BorderLayout.CENTER);
 
         // 底部:状态栏 + 复制
         JPanel south = new JPanel(new BorderLayout());

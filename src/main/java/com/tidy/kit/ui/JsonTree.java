@@ -2,24 +2,35 @@ package com.tidy.kit.ui;
 
 import com.tidy.kit.model.JsonNodeModel;
 
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 大纲风格 JSON 树:无连线、纯缩进、清晰折叠三角(设计 5.3)。
  * 自动格式化会反复重建模型,因此重建前先记住展开/收起状态,再按它恢复。
+ * 右键可将选中节点及其子树作为完整 JSON 复制。
  */
 class JsonTree extends JTree {
 
     /** 路径片段分隔符,用不可打印字符避免 JSON key 本身含常规符号时产生歧义 */
     private static final String STEP_SEP = "\u0001";
 
-    JsonTree() {
+    /** 复制结果的反馈文案出口,由面板提供;树不持有状态栏 */
+    private final Consumer<String> statusReporter;
+    private final JPopupMenu copyMenu = new JPopupMenu();
+
+    JsonTree(Consumer<String> statusReporter) {
+        this.statusReporter = statusReporter;
         // 无连线纯缩进
         putClientProperty("JTree.lineStyle", "None");
         setShowsRootHandles(true);
@@ -28,6 +39,53 @@ class JsonTree extends JTree {
         // JTree() 无参构造会自带一份 Swing 示例树(Animal/Plantae 那些),新标签得从空模型开始
         setModel(new DefaultTreeModel(null));
         applyFontAndRowHeight();
+        installCopyMenu();
+    }
+
+    private void installCopyMenu() {
+        JMenuItem copyItem = new JMenuItem("复制");
+        copyItem.addActionListener(e -> copySelectedSubtree());
+        copyMenu.add(copyItem);
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                maybeShowCopyMenu(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                maybeShowCopyMenu(e);
+            }
+        });
+    }
+
+    /** press/release 两处都问一次:Windows/Linux 的 popup 标志多在 press,macOS 多在 release */
+    private void maybeShowCopyMenu(MouseEvent e) {
+        if (!e.isPopupTrigger()) {
+            return;
+        }
+        TreePath hit = getPathForLocation(e.getX(), e.getY());
+        if (hit == null || !(hit.getLastPathComponent() instanceof JsonTreeNode)) {
+            // 空白处或空模型(新标签、输入已清空):不弹菜单,免得让人以为复制到了什么
+            return;
+        }
+        // 先把选中位移到右键那一行;不移的话复制到的是上一次点选的行
+        setSelectionPath(hit);
+        copyMenu.show(this, e.getX(), e.getY());
+    }
+
+    /**
+     * 复制选中节点及其下所有子节点。
+     * 走 JsonNodeModel 原始模型而不是 TreeNode 视图,因此处于收起/懒构建状态的大节点也能拿到完整子树。
+     */
+    private void copySelectedSubtree() {
+        TreePath selected = getSelectionPath();
+        if (selected == null || !(selected.getLastPathComponent() instanceof JsonTreeNode node)) {
+            return;
+        }
+        String json = node.getModel().toPrettyValueString();
+        UiFeedback.copyToClipboard(json);
+        statusReporter.accept("已复制选中节点的内容,共 " + json.lines().count() + " 行");
     }
 
     /** 字体变化时(Dark/Light 切换、方案调整)重算行高 */

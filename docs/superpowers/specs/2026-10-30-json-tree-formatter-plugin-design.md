@@ -47,9 +47,11 @@
 - 自写递归下降解析器,不引第三方库(需保留错误定位上下文,现成库不可控;规模约 300 行内)
 
 ### 5.3 JsonTreePanel(工具窗口与 Dialog 复用)
-布局:输入区 JTextArea + 模式下拉 -> 树区 -> [复制结果] + 状态栏。
+布局:输入区 JTextArea + 模式下拉 -> 树区 -> [复制结果] + 状态栏。输入区与树区之间用 JBSplitter 分隔,高度可拖。
 - 交互:无 [格式化] 按钮,输入停止 300ms 自动解析渲染(与 JSON 对比面板同一套防抖);
   输入为空或新建标签时结果区留空,不预置示例内容
+- 树上右键 -> [复制]:把选中节点及其子树导出为完整 JSON(不带自身 key、不带 escaped JSON 注释),
+  详见 `2026-11-02-json-tree-context-menu-copy-design.md`
 - 树外观:setRowHeight(字体行高+2)、setShowsRootHandles(true)、putClientProperty("JTree.lineStyle","None") -> 无连线纯缩进 + 折叠三角
 - 颜色/字体全部取 IDE ColorKey/FontKey,自动适配 Dark/Light
 - Renderer:key 用局部变量色,字符串用字面量色,数字用类型色;对象/数组折叠后行尾显示 {7 keys} / [12] 计数

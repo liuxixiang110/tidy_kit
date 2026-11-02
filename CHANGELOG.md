@@ -9,6 +9,12 @@
 - **JSON 树视图**（`JSON格式化`）：自写递归下降解析器（不引第三方库），大纲风格渲染
   （无连线、纯缩进、清晰折叠三角），严格/宽松双模式，宽松模式支持提取平衡主体、
   容忍单引号/尾逗号/注释、自动解开"顶层是转义 JSON 字符串"的内层，节点数超 100 000 提示。
+- **格式化结果树右键复制**（`JsonTree` 自带 `JPopupMenu`，菜单一项`复制`）：把选中节点及其下所有
+  子节点序列化成一份完整 JSON。为此在模型层加了 `JsonNodeModel.toPrettyValueString()`，
+  与展示用的 `toPrettyString()` 差在两处：不输出节点自身的 key（否则拿到的是 `"user": {…}` 这样的片段）、
+  不输出 `(escaped JSON):` 注释行（那行是给人看的，混进复制结果 JSON 就废了）。
+  右键先 `setSelectionPath` 把选中位移到鼠标那一行，避免复制到上一次点选的行；空树/空白处不弹菜单。
+  对比树没做（差异节点存的是左右两侧各自的值，没有单一"内容"可复制）。
 - **JSON 对比**（`JSON对比`）：按 key 路径做结构化语义递归比对，识别新增/删除/值变更/类型不同，
   合成一棵合并差异树；输入停止 300ms 自动对比；`仅展示差异` 过滤；重渲染保留手动展开状态。
 - **两层历史池**（`history` 包，跨 IDE 重启）：单段 JSON 上限 50 条，对比现场**成对**上限 30 条
@@ -27,10 +33,16 @@
   踩坑：`untilBuild = '*'` 会被 gradle-intellij-plugin 解析成无效版本号（报“since-build 241.0 大于
   until-build 88.*”），正确写法是 `untilBuild.set(provider { null })`。
   代价：不设上限后，真遇到 API 不兼容时会是运行期报错而不是安装时的“不适配”提示。
-- 100 个纯逻辑层单测（不启 IDE 即可跑）。
+- 100 个纯逻辑层单测（不启 IDE 即可跑），后续补到 104 个（新增 4 条覆盖 `toPrettyValueString`，
+  其中一条拿"复制结果能被严格模式重新解析"当硬判据）。
 
 ### 变更
 
+- **`JSON格式化` / `JSON对比` 的输入区高度改成可拖**：原先用 `setPreferredSize(new Dimension(10, 140/160))`
+  写死，想把输入框拉大只能整个工具窗口拉高。换成 `JBSplitter(true, 0.4f)` 分隔输入区与结果区，
+  与 `HTML格式化`/`XML格式化` 用的 `TextFormatPanel` 同一套做法（控制行仍贴在输入区下方）。
+  没有加 `setMinimumSplitFraction`/`setProportionKey` —— 那两个方法在 `JBSplitter` 上不存在（属于
+  `OnePixelSplitter`），编译不过；HTML/XML 面板本身也没做比例持久化，这里保持一致。
 - **`JSON格式化` 改成输入即自动格式化，删掉 `格式化` 按钮**：沿用对比面板那套 300ms 防抖
   （`DocumentListener` 收到删/插事件就 `Timer.restart()`，一次 `setText` 会连发两个事件，天然合并成一次解析）；
   切换模式下拉时也调度重算，用 `lastFormattedMode` 判断"真的变了才调度"，避免下拉弹出/关闭的多余 ActionEvent。

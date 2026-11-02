@@ -2,6 +2,7 @@ package com.tidy.kit.ui;
 
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.JBSplitter;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextArea;
@@ -39,6 +40,7 @@ import java.awt.GridLayout;
 /**
  * JSON 对比面板:左右两个输入区 + 共用模式,输入变动后自动防抖对比 -> 单棵合并差异树 + 状态摘要。
  * 严格模式解析失败时给"宽松模式重试"。
+ * 输入区与差异树之间用 JBSplitter 分隔,高度可拖(与 HTML/XML 面板一致)。
  */
 public class JsonDiffPanel extends JPanel {
 
@@ -100,7 +102,6 @@ public class JsonDiffPanel extends JPanel {
         JPanel inputs = new JPanel(new GridLayout(1, 2, 6, 0));
         inputs.add(labeled("输入 A", scrollPaneA));
         inputs.add(labeled("输入 B", scrollPaneB));
-        inputs.setPreferredSize(new Dimension(10, 160));
 
         JPanel controlRow = new JPanel();
         controlRow.setLayout(new BoxLayout(controlRow, BoxLayout.X_AXIS));
@@ -121,12 +122,15 @@ public class JsonDiffPanel extends JPanel {
         controlRow.add(Box.createHorizontalStrut(4));
         controlRow.add(collapseAllButton);
 
-        JPanel north = new JPanel(new BorderLayout());
-        north.add(inputs, BorderLayout.CENTER);
-        north.add(controlRow, BorderLayout.SOUTH);
-        add(north, BorderLayout.NORTH);
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(inputs, BorderLayout.CENTER);
+        top.add(controlRow, BorderLayout.SOUTH);
 
-        add(new JBScrollPane(diffTree), BorderLayout.CENTER);
+        // 输入区与差异树之间用可拖动分割条,高度不再写死;初始比例与 HTML/XML 面板一致
+        JBSplitter splitter = new JBSplitter(true, 0.4f);
+        splitter.setFirstComponent(top);
+        splitter.setSecondComponent(new JBScrollPane(diffTree));
+        add(splitter, BorderLayout.CENTER);
 
         JPanel south = new JPanel(new BorderLayout());
         south.add(statusLabel, BorderLayout.CENTER);

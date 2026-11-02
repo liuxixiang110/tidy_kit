@@ -48,7 +48,7 @@
 
 - 构造签名变为 `JsonTree(Consumer<String> statusReporter)`。状态文案由外部给,树不持有 `JBLabel`,保持与面板解耦。
 - 内部装一个 `MouseListener`,只处理 `isPopupTrigger()`:
-  - `getPathForLocation(e.getPoint())` 命中节点 → 先 `setSelectionPath(path)` 再弹菜单。理由:不先移动选中位,复制到的会是上一次点选的行,和右键点的位置不一致。
+  - `getPathForLocation(e.getX(), e.getY())` 命中节点 → 先 `setSelectionPath(path)` 再弹菜单。理由:不先移动选中位,复制到的会是上一次点选的行,和右键点的位置不一致。
   - 未命中(点在空白处)、或模型为空(`getModel().getRoot() == null`,即新建标签/输入已清空) → 不弹菜单。
   - 菜单一项"复制" → `UiFeedback.copyToClipboard(node.getModel().toPrettyValueString())`,随后 `statusReporter.accept("已复制选中节点的内容,共 N 行")`(N = 复制文本的换行数 + 1)。
 - 菜单用 Swing `JPopupMenu`/`JMenuItem`(与本工程既有 UI 代码一致,`HistoryPopup` 已验证该路径在 IntelliJ 主题下正常),不引入平台 `ActionGroup`。
