@@ -24,6 +24,8 @@ class JsonDiffTree extends JTree {
         setShowsRootHandles(true);
         setRootVisible(true);
         setCellRenderer(new JsonDiffCellRenderer());
+        // JTree() 无参构造会自带一份 Swing 示例树(Animal/Plantae 那些),新建对比标签得从空模型开始
+        setModel(new DefaultTreeModel(null));
         applyFontAndRowHeight();
     }
 
@@ -62,9 +64,8 @@ class JsonDiffTree extends JTree {
             return;
         }
         boolean expanded = isExpanded(path);
-        if (!prefix.isEmpty()) {
-            state.put(prefix, expanded);
-        }
+        // 根也记录:否则用户"全部收起"后一次重算就会把根重新弹开
+        state.put(prefix, expanded);
         if (!expanded) {
             return;
         }
@@ -76,19 +77,14 @@ class JsonDiffTree extends JTree {
 
     /**
      * 按记录恢复展开状态。
-     * 根节点强制展开;本次新出现的节点(没被记录过)回到默认策略:含差异则展开。
+     * 本次新出现的节点(没被记录过)回到默认策略:根展开,其余节点含差异则展开。
      */
     private void applyExpansion(DiffTreeNode node, TreePath path, String prefix, Map<String, Boolean> previous) {
         if (node.getChildCount() == 0) {
             return;
         }
-        boolean expand;
-        if (prefix.isEmpty()) {
-            expand = true;
-        } else {
-            Boolean remembered = previous.get(prefix);
-            expand = remembered != null ? remembered : node.getDiff().isHasNestedDiff();
-        }
+        Boolean remembered = previous.get(prefix);
+        boolean expand = remembered != null ? remembered : prefix.isEmpty() || node.getDiff().isHasNestedDiff();
         if (expand) {
             expandPath(path);
         } else {
@@ -127,9 +123,14 @@ class JsonDiffTree extends JTree {
         }
     }
 
+    /**
+     * 收起全部:连根一起折起来,只剩根那一行。
+     * 不逐行 collapseRow(i>0)——那样只会退到"根 + 直接子节点",收不彻底。
+     */
     void collapseAllNodes() {
-        for (int i = getRowCount() - 1; i > 0; i--) {
-            collapseRow(i);
+        Object root = getModel().getRoot();
+        if (root != null) {
+            collapsePath(new TreePath(root));
         }
         revalidate();
         repaint();

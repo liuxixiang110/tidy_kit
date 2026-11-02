@@ -31,6 +31,15 @@
 
 ### 变更
 
+- **`JSON格式化` 改成输入即自动格式化，删掉 `格式化` 按钮**：沿用对比面板那套 300ms 防抖
+  （`DocumentListener` 收到删/插事件就 `Timer.restart()`，一次 `setText` 会连发两个事件，天然合并成一次解析）；
+  切换模式下拉时也调度重算，用 `lastFormattedMode` 判断"真的变了才调度"，避免下拉弹出/关闭的多余 ActionEvent。
+  清空结果走 `clearResult()`：置空树模型、清掉 `lastPretty`（防止复制按钮粘上一次结果）、收起`宽松模式重试`。
+- **新建 Tab 不再显示 Swing 示例树**：`JsonTree` 与 `JsonDiffTree` 之前都用的 `JTree()` 无参构造，Swing 会自带一份
+  Animal/Plantae 示例模型，被两个渲染器的 fallback 分支渲染成"默认那坨 JSON"（格式化与对比两个标签都中招）。
+  现在均在构造里显式 `setModel(new DefaultTreeModel(null))`；输入框为空时也走同一条清空路径。
+  对比标签额外在构造尾调一次 `clearResult(...)`，把“输入 A 和输入 B 都有内容后会自动对比”当开场提示，
+  否则两侧没填时下面又空又没字，看着像整个面板是坏的。
 - 插件显示名：`JSON Tree Formatter` / `JSON Formatter` → `Formatter` → **`TidyKit`**（三处耦合点：`<name>`、
   `<toolWindow id>`（即右侧竖条显示名）、工厂里 `createContent` 的标题）。
 - **包名与插件 id：`com.you.jsonformatter` → `com.tidy.kit`**，同步修正 `plugin.xml` 的 `factoryClass` 与
@@ -53,12 +62,27 @@
 
 ### 修复
 
+- **`全部收起` 点了没反应**：两棵树的 `collapseAllNodes()` 写的都是 `for (i = getRowCount()-1; i > 0; i--) collapseRow(i)`，
+  跳过行 0（根）→ 最多只能退到“根 + 直接子节点”；而自动渲染的默认展开恰好就是这个样子，
+  所以点下去行数不变、看着就是按钮失效（实测：13 行 → 4 行，而不是 → 1 行）。
+  改成模型驱动的 `collapsePath(new TreePath(root))` 一次折完（13 行 → 1 行），顺带去掉大树下
+  逐行 collapse 带来的 N 次重绘。代价：“收起”后只剩根那一行，要再展开得点 `全部展开`。
+  为了让这个选择在后续自动重算中不被抹掉，capture/restore 不再强制展开根，而是把根的状态也记下来。
+- **防抖定时器其实在无限重跑（根因）**：`javax.swing.Timer` 的 `repeats` 默认是 `true`，
+  `new Timer(300, listener)` + `restart()` 不是防抖而是“每 300ms 触发一次、永不停”——
+  于是自动格式化每隔 300ms 重解析一次并整树重展，用户刚收起的分支立即被弹回（同时 EDT 在空转）。
+  抽了包私有 `ui/Debounce.oneShot(delayMs, task)` 显式 `setRepeats(false)`，`JSON格式化` 与
+  `JSON对比` 两个定时器共用。对比面板症状不明显只是因为它已经做了展开状态 restore。
+- **格式化标签收起后自动弹开**：除了上面那个根因，`JsonTree.showJson` 原先也是直接 `setModel`
+  + 按默认策略展开；改成与 `JsonDiffTree` 同一套“先 capture 再 restore”（按 key/下标构成的路径做键），
+  没被记录过的新节点仍走默认策略（只展开根及其直接子节点）。
 - **标签 `×` 误触**：IntelliJ 新 UI 的 LAF 给 JButton 强加最小宽度，无边框单字符按钮被撑成隐形宽带，
   点标签里的"空白处"就关掉了整个标签。改为把 preferredSize/minimumSize/maximumSize
   三件套一起锁成 `JBUI.scale(16)` 见方（只设 preferredSize 无效，布局取 minimumSize）。
 - **拖选膨胀到行尾**：输入区不换行时，单行长 JSON 在 JTextArea 里拖选会触发横向自动滚动，
   选中区间被膨胀成"光标到末尾全选"。所有文本区统一 `setLineWrap(true) + setWrapStyleWord(true)`。
 - **对比丢展开状态**：整树 `setModel` 重建会丢失手动展开的节点，改为先 capture 再 restore。
+  （当时只改了 `JsonDiffTree`；`JSON格式化` 这一版才补上，且两边都还受下面的定时器问题影响）
 - **tooltip 超出屏幕**：历史条目悬浮窗塞入整段 JSON，日志出现
   `popup preferred size is bigger than screen: 310x1941`。改为限 24 行 / 1200 字符，
   单行压缩 JSON 用 `white-space:normal` 让内容折行而不是撑出横条。

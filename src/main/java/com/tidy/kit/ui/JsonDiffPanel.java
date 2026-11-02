@@ -68,8 +68,8 @@ public class JsonDiffPanel extends JPanel {
     private final JsonDiffTree diffTree = new JsonDiffTree();
     /** 最近一次对比结果,供切换"仅展示差异"时重渲染而无需重新解析 */
     private DiffNode lastDiffRoot;
-    /** 防抖定时器:输入或模式变更一段时间后自动对比 */
-    private final Timer compareTimer = new Timer(COMPARE_DELAY_MS, e -> autoCompare());
+    /** 防抖定时器:输入或模式变更一段时间后自动对比;必须是一次性触发,否则会每 300ms 空转 */
+    private final Timer compareTimer = Debounce.oneShot(COMPARE_DELAY_MS, this::autoCompare);
     /** 过滤按钮的默认外观,取消选中时还原 */
     private Color diffOnlyDefaultForeground;
     private Font diffOnlyDefaultFont;
@@ -85,6 +85,8 @@ public class JsonDiffPanel extends JPanel {
         buildUi();
         wireEvents();
         installScrollSync();
+        // 新建标签:不预置任何对比结果,状态栏说清它在等什么(否则两侧没填时看着像整个面板是坏的)
+        clearResult("输入 A 和输入 B 都有内容后会自动对比", false);
     }
 
     private void buildUi() {
