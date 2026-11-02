@@ -64,7 +64,8 @@
 ### 5.5 标签容器 TidyKitTabs
 - 顶部五个按钮新建五类标签,各自独立状态;标签头 = 标题 + `×`(尺寸锁死,避免新 UI 的隐形宽热区误触)
 - 任何标签都能关闭(含最后一个),不强制保留 —— 见 `2026-11-02-tidy-kit-tab-drag-reorder-design.md`
-- 标签头可拖拽换序:`ReorderableTabbedPane.moveTab(from, to)` 是唯一重排原语,手势只是触发器;顺序不持久化
+- 标签头可拖拽换序:`ReorderableTabbedPane.moveTab(from, to)` 是唯一重排原语,拖拽只定目标、松手才改模型
+  (鼠标还按着时改模型会断掉标签头的事件冒泡链);重排后的标签头是新建的,不复用刚被摘下的组件;顺序不持久化
 
 数据流:展示 = 输入 -> parse -> JsonNodeModel -> JsonTree;格式化 = 输入 -> parse -> toPrettyString(缩进 2 空格) -> 复制/回写。
 

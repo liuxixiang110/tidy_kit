@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,12 +17,21 @@ import static org.junit.jupiter.api.Assertions.assertSame;
  */
 class ReorderableTabbedPaneTest {
 
+    /** 工厂历次造出的标签头,用来验证重排后挂在新位置上的是新建实例而不是旧实例 */
+    private final List<JLabel> createdHeaders = new ArrayList<>();
+
     /** n 个标签:标题 "0".."n-1",内容面板与标签头各是独立实例,便于按身份断言 */
     private ReorderableTabbedPane paneWith(int count) {
         ReorderableTabbedPane pane = new ReorderableTabbedPane();
+        createdHeaders.clear();
+        pane.setHeaderFactory(title -> {
+            JLabel header = new JLabel("header-" + title);
+            createdHeaders.add(header);
+            return header;
+        });
         for (int i = 0; i < count; i++) {
             pane.addTab(String.valueOf(i), new JPanel());
-            pane.setTabComponentAt(i, new JLabel("header-" + i));
+            pane.setTabComponentAt(i, new JLabel("initial-" + i));
         }
         return pane;
     }
@@ -70,14 +80,28 @@ class ReorderableTabbedPaneTest {
         assertEquals(List.of("2", "0", "1"), titles(toHead));
     }
 
+    /** 内容面板跟着走(它才是状态所在),标签头则重建一个新的 —— 刚被 remove 摘下来的组件不能再塞回去 */
     @Test
-    void headerAndContentTravelTogether() {
+    void contentTravelsAndHeaderIsRebuilt() {
         ReorderableTabbedPane pane = paneWith(3);
-        Object header = pane.getTabComponentAt(1);
         Object content = pane.getComponentAt(1);
         pane.moveTab(1, 0);
-        assertSame(header, pane.getTabComponentAt(0));
+
         assertSame(content, pane.getComponentAt(0));
+        assertEquals(1, createdHeaders.size());
+        assertSame(createdHeaders.get(0), pane.getTabComponentAt(0));
+        assertEquals("header-1", ((JLabel) pane.getTabComponentAt(0)).getText());
+    }
+
+    @Test
+    void noFactoryKeepsTitleAndContent() {
+        ReorderableTabbedPane pane = new ReorderableTabbedPane();
+        Component content = new JPanel();
+        pane.addTab("A", content);
+        pane.addTab("B", new JPanel());
+        pane.moveTab(0, 1);
+        assertEquals(List.of("B", "A"), titles(pane));
+        assertSame(content, pane.getComponentAt(1));
     }
 
     @Test
@@ -92,13 +116,14 @@ class ReorderableTabbedPaneTest {
         assertEquals(List.of("0", "1", "2"), titles(illegal));
     }
 
+    /** 拖拽结束后用户看着的应该就是他刚拖的那个标签,不能因为换位而跳回另一个 */
     @Test
-    void selectionFollowsContentNotIndex() {
+    void movedTabStaysSelected() {
         ReorderableTabbedPane pane = paneWith(3);
-        Object showing = pane.getComponentAt(2);
-        pane.setSelectedIndex(2);
+        Object moved = pane.getComponentAt(0);
+        pane.setSelectedIndex(0);
         pane.moveTab(0, 2);
-        // 原来在看的那个面板换位后还得在看:选中跟的是内容实例,不是下标
-        assertSame(showing, pane.getSelectedComponent());
+        assertSame(moved, pane.getSelectedComponent());
+        assertEquals(2, pane.getSelectedIndex());
     }
 }

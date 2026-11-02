@@ -24,12 +24,21 @@
   `FEATURE_SECURE_PROCESSING` + 关闭外部 DTD/实体加载，声明与 DOCTYPE 按原文补回。
 - **URL 编码/解码**（`codec/UrlCodec`）：RFC 3986 百分号编解码，固定 UTF-8，宽松解码。
 - **多标签**：每类功能可开多个标签并存，各自独立状态；标签头带 `×` 关闭。
-- **标签拖拽换序**（`ui/ReorderableTabbedPane`）：标签头按住左右拖动即可换位置，越过相邻标签中线就实时换位。
-  `JTabbedPane` 没有 moveTab 这样的 API，所以把重排收成一个原语 `moveTab(from, to)`（取回 content/title/tabComponent
-  三个引用 → `remove(from)` → `insertTab(..., to)` → `setTabComponentAt`），拖拽手势只是它的触发器；
-  换位只改挂载关系，内容面板始终是同一个实例，输入文本与展开状态不受影响；选中按内容实例恢复，不按下标。
-  用手写拖拽而不用 AWT `DragSource`/`DropTarget`：实时重排会把正在拖的标签头 remove 再 add，与 DnD 会话冲突，
-  而且传一个下标还得为它写 `Transferable`。代价：没有跟随鼠标的拖拽影像。
+- **标签整块都是选中热区**（仅 `×` 除外）：`ReorderableTabbedPane` 的标签头收到 `mousePressed` 就直接
+  `setSelectedIndex`，并把 `JBUI.scale(6)` 的左右内边距算进标签头自身（tab 尺寸跟着标签头首选尺寸走）。
+  原先指望冒泡到 pane 再做一次 `tabForCoordinate`，但自定义 tabComponent 挂在 UI 私有的
+  `TabContainer`，不在 pane 的直接子组件链上，结果只有标签外围那圈 pane 内边距能点中——
+  现象就是“能选中 tab 的区域太小”。
+- **标签拖拽换序**（`ui/ReorderableTabbedPane`）：标签头按住左右拖动即可换位置，**松手时生效**。
+  `JTabbedPane` 没有 moveTab 这样的 API，所以把重排收成一个原语 `moveTab(from, to)`
+  （取出 content/title → `remove(from)` → `insertTab(..., target)` → 重排后给这个标签装**新建**的标签头），
+  手势只负责定目标；换位只改挂载关系，内容面板始终是同一个实例，输入文本与展开状态不受影响。
+  拖拽期间零模型变更，`moveTab` 放在 `mouseReleased` 后的 `invokeLater` 里：标签头组件由 UI 私有的
+  `TabContainer` 承载，而子组件往父容器冒泡的 dispatcher 链是 `Container.addImpl` 在加入那一刻建立的，
+  鼠标还按着的时候反复把同一个标签头 remove 再塞回去会把这条链弄断——第一版做成了“越线实时换位”，
+  现象就是换完序之后点其他标签不再切换选中。
+  用手写拖拽而不用 AWT `DragSource`/`DropTarget`：传一个下标还得为它写 `Transferable`。
+  代价：没有跟随鼠标的拖拽影像，拖的时候也看不出会插到哪。
 - 顶部按钮行：`JSON格式化` / `JSON对比` / `URL编码/解码` / `HTML格式化` / `XML格式化`。
 - **兼容 JetBrains 全家桶**：`plugin.xml` 只依赖 `com.intellij.modules.platform`（删掉了
   `<depends>com.intellij.modules.java</depends>`），`build.gradle` 的 `intellij.plugins` 也去掉了
@@ -40,7 +49,7 @@
   until-build 88.*”），正确写法是 `untilBuild.set(provider { null })`。
   代价：不设上限后，真遇到 API 不兼容时会是运行期报错而不是安装时的“不适配”提示。
 - 100 个纯逻辑层单测（不启 IDE 即可跑），后续补到 104 个（新增 4 条覆盖 `toPrettyValueString`，
-  其中一条拿"复制结果能被严格模式重新解析"当硬判据）；再加标签重排的下标用例后为 111 个。
+  其中一条拿"复制结果能被严格模式重新解析"当硬判据）；再加标签重排的下标用例后为 112 个。
 
 ### 变更
 

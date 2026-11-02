@@ -8,6 +8,7 @@ import com.tidy.kit.format.XmlFormatter;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -17,7 +18,7 @@ import java.awt.FlowLayout;
 /**
  * 工具窗口内的多标签容器:顶部五个按钮分别新建
  * JSON格式化 / JSON对比 / URL编码/解码 / HTML格式化 / XML格式化 标签,每个标签带 "×" 可关闭。
- * 标签头可按住左右拖动换顺序(见 ReorderableTabbedPane)。
+ * 标签头可按住左右拖动换位置,松手时生效(见 ReorderableTabbedPane)。
  * 按钮行用 FlowLayout,工具窗口很窄时会自然换行。
  */
 public class TidyKitTabs extends JPanel {
@@ -43,6 +44,9 @@ public class TidyKitTabs extends JPanel {
         add(toolbar, BorderLayout.NORTH);
 
         add(tabbedPane, BorderLayout.CENTER);
+
+        // 重排时容器会给被挪走的标签重建标签头(不复用刚被摘下来的组件),这里提供造头入口
+        tabbedPane.setHeaderFactory(this::newHeader);
 
         // 首个标签不预填剪贴板(由工厂处理),这里建一个空面板占位
         addFormatTab(false);
@@ -87,17 +91,24 @@ public class TidyKitTabs extends JPanel {
     private void addTab(JPanel panel, String title, boolean focus) {
         int index = tabbedPane.getTabCount();
         tabbedPane.addTab(title, panel);
-        JPanel header = buildTabHeader(title);
-        tabbedPane.setTabComponentAt(index, header);
-        tabbedPane.installDragReorder(header);
+        tabbedPane.setTabComponentAt(index, newHeader(title));
         if (focus) {
             tabbedPane.setSelectedIndex(index);
         }
     }
 
-    /** 自定义标签头:标题 + 关闭按钮 */
+    /** 标签头 = 标题 + 关闭 + 拖拽换序手势;新建标签与重排后重建都走这里,保证两条路径配置一致 */
+    private JComponent newHeader(String title) {
+        JPanel header = buildTabHeader(title);
+        tabbedPane.installDragReorder(header);
+        return header;
+    }
+
+    /** 自定义标签头:标题 + 关闭按钮;整块都能点选中,仅关闭按钮除外 */
     private JPanel buildTabHeader(String title) {
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        // 左右内边距算在标签头自己身上:tab 的尺寸跟着标签头的首选尺寸算,
+        // 留给 pane 的内边距越少,能点中标签的区域就越大
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, JBUI.scale(6), 0));
         header.setOpaque(false);
         header.add(new JBLabel(title));
 
