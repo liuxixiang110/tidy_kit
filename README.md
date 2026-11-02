@@ -1,10 +1,12 @@
 # TidyKit
 
-一个自用的 IntelliJ 家族插件（IDEA / GoLand / DataGrip 等）：把杂乱的文本收拾干净。
-一个工具窗口里用标签承载多类小工具，结果都能一键复制。
+一个自用的 JetBrains 全家桶插件（IDEA / GoLand / DataGrip / PyCharm / WebStorm / PhpStorm / CLion / Rider / Aqua）：
+把杂乱的文本收拾干净。一个工具窗口里用标签承载多类小工具，结果都能一键复制。
 
-- 兼容区间：build **241 ~ 262.***（2024.1 ~ 2026.2），在 `build.gradle` 的 `patchPluginXml` 里配
-- 只依赖 `com.intellij.modules.platform`，不碰 PSI，所以不带 Java 插件的 IDE（DataGrip）也能装
+- 兼容：**下限 build 241（2024.1），不封顶** —— `patchPluginXml` 根本不往 `plugin.xml` 里写 `until-build`，
+  平台视同无上限，因此 JetBrains 出新主版本也不需回来改这一行
+- 只依赖 `com.intellij.modules.platform`，**编译期也不挂 Java 插件**（源码不碰 PSI），
+  所以不带 Java 插件的 IDE（DataGrip、WebStorm、Aqua 等）不会被依赖卡住
 - 分发方式：本地打包 + Install Plugin from Disk，**不发布 Marketplace**
 
 ## 安装
@@ -105,8 +107,11 @@
 - HTML/XML 没有严格/宽松开关（各自的容错策略写死在格式化器里）。
 - XML 的 mixed content（段落里夹标签）空白有语义，不做特判也不重排。
 - 无快捷键、无自定义设置页。
-- 兼容区间放宽到 262.* 后，真实运行只在 IDEA 上验证过；GoLand / DataGrip 属于
-  “元数据允许安装”，首次使用建议先拿小文档跑一遍。
+- 兼容只设了下限（241）、不设上限，代价是：真遇到 API 不兼容时，会表现成运行期报错
+  而不是安装时的“不适配”提示。插件只用 `openapi` / `ui` / `util` 这几块稳定 API，风险低；
+  真挂了就回滚上一版 zip。
+- 真实运行只在 IDEA 沙盒验证过；GoLand / DataGrip 等属于“元数据允许安装”，
+  首次使用建议先拿小文档跑一遍。
 
 ## 开发
 

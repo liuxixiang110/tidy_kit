@@ -35,18 +35,21 @@ test {
 }
 
 intellij {
-    // 只是编译期用的平台(决定 API 版本与下载哪份 SDK);产物能装进哪些 IDE 由下面 patchPluginXml 的区间决定
+    // 只是编译期用的平台(决定 API 版本与下载哪份 SDK),产物能装进哪些 IDE 由下面 patchPluginXml 的区间决定
     version = '2024.1.4'
     type = 'IC'
-    plugins = ['com.intellij.java']
+    // 不列 com.intellij.java:源码不碰 PSI,带上它只会误导――让人以为只有 IDEA 能用
+    plugins = []
 }
 
 tasks {
     patchPluginXml {
-        // 241(2024.1) ~ 262.*(2026.2):覆盖 IDEA / GoLand / DataGrip 等所有 IntelliJ 家族 IDE。
-        // 升到 2027.x 再把 untilBuild 往上推一行;不写 '*' 是为了不兼容时报成清晰的“不适配”而不是运行期玄错。
+        // sinceBuild 钉在 241(2024.1):代码用了 241 才有的 ContentFactory.getInstance()。
+        // untilBuild 不封顶:JetBrains 家族各产品版本号不一(Rider/CLion/PyCharm/Aqua 都走 26x),
+        // 写死上限会导致新主版本发布时插件集体装不上。代价:真不兼容时会是运行期报错而不是“不适配”提示。
+        // 做法是根本不往 plugin.xml 里写 until-build(平台视同无上限);写 '*' 会被本插件解析成无效版本号。
         sinceBuild = '241'
-        untilBuild = '262.*'
+        untilBuild.set(provider { null })
     }
     buildSearchableOptions {
         enabled = false

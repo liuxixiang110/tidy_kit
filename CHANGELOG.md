@@ -19,10 +19,15 @@
 - **URL 编码/解码**（`codec/UrlCodec`）：RFC 3986 百分号编解码，固定 UTF-8，宽松解码。
 - **多标签**：每类功能可开多个标签并存，各自独立状态；标签头带 `×` 关闭（至少保留一个）。
 - 顶部按钮行：`JSON格式化` / `JSON对比` / `URL编码/解码` / `HTML格式化` / `XML格式化`。
-- 兼容区间 `241 ~ 262.*`（2024.1 ~ 2026.2），`plugin.xml` 只依赖 `com.intellij.modules.platform`：
-  源码未 import PSI/Java API，所以 GoLand、DataGrip 这些不带 Java 插件的 IDE 也能装
-  （原 `untilBuild = 251.*` + `<depends>com.intellij.modules.java</depends>` 会把它们挡在外面）。
-- 97 个纯逻辑层单测（不启 IDE 即可跑）。
+- **兼容 JetBrains 全家桶**：`plugin.xml` 只依赖 `com.intellij.modules.platform`（删掉了
+  `<depends>com.intellij.modules.java</depends>`），`build.gradle` 的 `intellij.plugins` 也去掉了
+  `com.intellij.java` —— 没有 Java 插件参与编译，本身就是“不依赖它”的证明。
+  `patchPluginXml` 只写下限 `sinceBuild = 241`，**不写 `until-build`**（平台视同无上限），
+  因此 IDEA / GoLand / DataGrip / PyCharm / WebStorm / PhpStorm / CLion / Rider / Aqua 均可安装。
+  踩坑：`untilBuild = '*'` 会被 gradle-intellij-plugin 解析成无效版本号（报“since-build 241.0 大于
+  until-build 88.*”），正确写法是 `untilBuild.set(provider { null })`。
+  代价：不设上限后，真遇到 API 不兼容时会是运行期报错而不是安装时的“不适配”提示。
+- 100 个纯逻辑层单测（不启 IDE 即可跑）。
 
 ### 变更
 
@@ -40,6 +45,8 @@
 - 历史存储键刻意不动：`@State` 名 `JsonFormatterHistory` 与文件 `json-formatter-history.xml`
   属于遗留命名，改它会丢已存的历史。
 - 顶部原 `+` 按钮改名 `JSON格式化`，语义不变（新建一个 JSON 标签）。
+- JSON 模式下拉框改成中文 `严格` / `宽松`（之前直接展示枚举名 `STRICT` / `LENIENT`）；
+  历史文件仍存枚举名（`mode.name()`），旧记录照旧能读回来并自动显示中文。
 - 标签页命名从 `JSON n` 改为按功能命名（`JSON格式化 n` / `JSON对比 n`，HTML/XML/URL 取短式）。
 - 状态栏着色与剪贴板复制从 4 个面板里的重复实现抽成包私有 `ui/UiFeedback`。
 - `plugin.xml` 的 `<description>` 重写，覆盖新增的对比/HTML/XML/URL 能力。
