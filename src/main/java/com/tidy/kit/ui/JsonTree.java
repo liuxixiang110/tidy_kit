@@ -12,6 +12,7 @@ import java.awt.FontMetrics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -19,6 +20,8 @@ import java.util.function.Consumer;
  * 大纲风格 JSON 树:无连线、纯缩进、清晰折叠三角(设计 5.3)。
  * 自动格式化会反复重建模型,因此重建前先记住展开/收起状态,再按它恢复。
  * 右键可将选中节点及其子树作为完整 JSON 复制。
+ * 查找相关只做三件事:把查询串交给渲染器做高亮、把命中路径展开并选中第一个、
+ * 以及重复查找时把单独一处展开后滚动过去。
  */
 class JsonTree extends JTree {
 
@@ -28,6 +31,8 @@ class JsonTree extends JTree {
     /** 复制结果的反馈文案出口,由面板提供;树不持有状态栏 */
     private final Consumer<String> statusReporter;
     private final JPopupMenu copyMenu = new JPopupMenu();
+    /** 持有引用是为了能把查询串递给它的 setQuery */
+    private final JsonTreeCellRenderer cellRenderer = new JsonTreeCellRenderer();
 
     JsonTree(Consumer<String> statusReporter) {
         this.statusReporter = statusReporter;
@@ -35,7 +40,7 @@ class JsonTree extends JTree {
         putClientProperty("JTree.lineStyle", "None");
         setShowsRootHandles(true);
         setRootVisible(true);
-        setCellRenderer(new JsonTreeCellRenderer());
+        setCellRenderer(cellRenderer);
         // JTree() 无参构造会自带一份 Swing 示例树(Animal/Plantae 那些),新标签得从空模型开始
         setModel(new DefaultTreeModel(null));
         applyFontAndRowHeight();
@@ -163,10 +168,9 @@ class JsonTree extends JTree {
         }
     }
 
-    /** 路径片段:对象成员用 key,数组元素用下标 */
+    /** 路径片段:对象成员用 key,数组元素用下标。编码规则与查找共用 JsonTreeSearch */
     private static String stepOf(JsonTreeNode node, int index) {
-        String key = node.getModel().getKey();
-        return key != null ? STEP_SEP + "k" + key : STEP_SEP + "i" + index;
+        return STEP_SEP + JsonTreeSearch.stepOf(node.getModel(), index);
     }
 
     /** 展开全部节点(递归物化懒子节点,超大树会较慢) */
@@ -203,5 +207,105 @@ class JsonTree extends JTree {
         }
         revalidate();
         repaint();
+    }
+
+    /** 把查询串交给渲染器就地判高亮;传 null 或空串即清除高亮 */
+    void setSearchQuery(String query) {
+        cellRenderer.setQuery(query);
+        repaint();
+    }
+
+    /** 当前解析结果的根模型;还没解析出来(空模型)时返回 null */
+    JsonNodeModel rootModel() {
+        JsonTreeNode root = treeRoot();
+        return root == null ? null : root.getModel();
+    }
+
+    /** 视图树的根;空模型(新标签、输入已清空)时返回 null */
+    private JsonTreeNode treeRoot() {
+        return getModel().getRoot() instanceof JsonTreeNode root ? root : null;
+    }
+
+    /**
+     * 逐条展开命中路径(expandPath 连带展开祖先),选中并滚动到第一条。
+     * 只展开调用方递过来的条数,上限策略不在树这一层。
+     */
+    void expandAndSelect(List<JsonTreeSearch.Hit> hits) {
+        JsonTreeNode root = treeRoot();
+        if (root == null || hits.isEmpty()) {
+            return;
+        }
+        TreePath first = null;
+        for (JsonTreeSearch.Hit hit : hits) {
+            TreePath path = pathOf(root, hit.steps());
+            if (path == null) {
+                continue;
+            }
+            expandPath(path);
+            if (first == null) {
+                first = path;
+            }
+        }
+        if (first != null) {
+            setSelectionPath(first);
+            scrollPathToVisible(first);
+        }
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * 跳到单独一处:只展开它自己的祖先并滚动过去,不碰其他分支的展开状态。
+     * 路径对不上(模型与视图不同步)时什么都不做,交给调用方的游标继续往下走。
+     */
+    void selectAndReveal(JsonTreeSearch.Hit hit) {
+        JsonTreeNode root = treeRoot();
+        if (root == null) {
+            return;
+        }
+        TreePath path = pathOf(root, hit.steps());
+        if (path == null) {
+            return;
+        }
+        expandPath(path);
+        setSelectionPath(path);
+        scrollPathToVisible(path);
+        revalidate();
+        repaint();
+    }
+
+    /** 按步骤串从根走到命中节点;某一步对不上(模型与视图不同步)就返回 null 跳过 */
+    private static TreePath pathOf(JsonTreeNode root, List<String> steps) {
+        TreePath path = new TreePath(root);
+        JsonTreeNode current = root;
+        for (String step : steps) {
+            JsonTreeNode child = childOf(current, step);
+            if (child == null) {
+                return null;
+            }
+            path = path.pathByAddingChild(child);
+            current = child;
+        }
+        return path;
+    }
+
+    /** 步骤串 -> 子节点:下标直接取,key 得扫一遍(getChildAt 会顺带物化懒节点) */
+    private static JsonTreeNode childOf(JsonTreeNode node, String step) {
+        if (step.isEmpty()) {
+            return null;
+        }
+        if (step.charAt(0) == 'i') {
+            int index = Integer.parseInt(step.substring(1));
+            return index >= 0 && index < node.getChildCount()
+                    ? (JsonTreeNode) node.getChildAt(index)
+                    : null;
+        }
+        for (int i = 0; i < node.getChildCount(); i++) {
+            JsonTreeNode child = (JsonTreeNode) node.getChildAt(i);
+            if (step.equals(JsonTreeSearch.stepOf(child.getModel(), i))) {
+                return child;
+            }
+        }
+        return null;
     }
 }

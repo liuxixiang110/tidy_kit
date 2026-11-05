@@ -47,6 +47,24 @@ final class UiColors {
         return foreground(DefaultLanguageHighlighterColors.LINE_COMMENT, JBColor.GRAY);
     }
 
+    /**
+     * 查找命中的背景色。不随 Dark/Light 分支:浅黄底配近黑字,压在深色行背景上
+     * 比用 JBColor 自适应更稳,也少一处主题判断。
+     */
+    static Color searchHitBackground() {
+        return new Color(0xFFD666);
+    }
+
+    /** 查找命中的前景色:压在黄底上的近黑 */
+    static Color searchHitForeground() {
+        return new Color(0x1E1E1E);
+    }
+
+    /** HTML 片段里只能写 #rrggbb,统一在这里转,免得多处各自 format */
+    static String hex(Color c) {
+        return String.format("#%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
+    }
+
     /** 用于渲染中文等 CJK 字符的探测码点(“中”) */
     private static final int CJK_PROBE = 0x4E2D;
 

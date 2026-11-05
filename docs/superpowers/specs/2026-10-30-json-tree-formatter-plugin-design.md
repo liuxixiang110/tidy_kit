@@ -52,6 +52,10 @@
   输入为空或新建标签时结果区留空,不预置示例内容
 - 树上右键 -> [复制]:把选中节点及其子树导出为完整 JSON(不带自身 key、不带 escaped JSON 注释),
   详见 `2026-11-02-json-tree-context-menu-copy-design.md`
+- 控制行 `历史` 右侧有查找输入框 + [查找]:按子串包含(区分大小写)在 key/value 里找,命中则展开所在分支
+  并高亮关键字。查询串没变时重复点[查找]/回车会在命中之间循环跳转,走到最后一处后回到第一处。
+  搜索走 JsonNodeModel 模型树,高亮由渲染器拿 query 就地判定,详见
+  `2026-11-04-json-tree-search-highlight-design.md`
 - 树外观:setRowHeight(字体行高+2)、setShowsRootHandles(true)、putClientProperty("JTree.lineStyle","None") -> 无连线纯缩进 + 折叠三角
 - 颜色/字体全部取 IDE ColorKey/FontKey,自动适配 Dark/Light
 - Renderer:key 用局部变量色,字符串用字面量色,数字用类型色;对象/数组折叠后行尾显示 {7 keys} / [12] 计数
