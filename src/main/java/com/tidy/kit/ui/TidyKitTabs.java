@@ -16,8 +16,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 
 /**
- * 工具窗口内的多标签容器:顶部五个按钮分别新建
- * JSON格式化 / JSON对比 / URL编码/解码 / HTML格式化 / XML格式化 标签,每个标签带 "×" 可关闭。
+ * 工具窗口内的多标签容器:顶部六个按钮分别新建
+ * JSON格式化 / JSON对比 / URL编码/解码 / HTML格式化 / XML格式化 / SQL参数格式化 标签,每个标签带 "×" 可关闭。
  * 标签头可按住左右拖动换位置,松手时生效(见 ReorderableTabbedPane)。
  * 按钮行用 FlowLayout,工具窗口很窄时会自然换行。
  */
@@ -29,6 +29,7 @@ public class TidyKitTabs extends JPanel {
     private int urlCounter = 0;
     private int htmlCounter = 0;
     private int xmlCounter = 0;
+    private int sqlCounter = 0;
 
     public TidyKitTabs() {
         super(new BorderLayout());
@@ -41,6 +42,7 @@ public class TidyKitTabs extends JPanel {
         addButton(toolbar, "URL编码/解码", "新建一个 URL 百分号编码解码标签", () -> addUrlTab(true));
         addButton(toolbar, "HTML格式化", "新建一个 HTML 格式化标签", () -> addTextTab("HTML", new HtmlFormatter(), true));
         addButton(toolbar, "XML格式化", "新建一个 XML 格式化标签", () -> addTextTab("XML", new XmlFormatter(), true));
+        addButton(toolbar, "SQL参数格式化", "新建一个 SQL 参数格式化标签", () -> addSqlTab(true));
         add(toolbar, BorderLayout.NORTH);
 
         add(tabbedPane, BorderLayout.CENTER);
@@ -52,7 +54,7 @@ public class TidyKitTabs extends JPanel {
         addFormatTab(false);
     }
 
-    /** 五个新建标签的按钮长得一样,抽出来免得四处重复 setMargin/setToolTip */
+    /** 六个新建标签的按钮长得一样,抽出来免得四处重复 setMargin/setToolTip */
     private static void addButton(JPanel toolbar, String text, String tooltip, Runnable action) {
         JButton button = new JButton(text);
         button.setToolTipText(tooltip);
@@ -86,6 +88,11 @@ public class TidyKitTabs extends JPanel {
     private void addTextTab(String kind, TextFormatter formatter, boolean focus) {
         int counter = "HTML".equals(kind) ? ++htmlCounter : ++xmlCounter;
         addTab(new TextFormatPanel(kind, formatter), kind + " " + counter, focus);
+    }
+
+    /** SQL 日志占位符回填;标签名取短式,免得"SQL参数格式化 n"把标签头撑太宽 */
+    private void addSqlTab(boolean focus) {
+        addTab(new SqlParamPanel(), "SQL " + (++sqlCounter), focus);
     }
 
     private void addTab(JPanel panel, String title, boolean focus) {
@@ -138,7 +145,7 @@ public class TidyKitTabs extends JPanel {
             }
         }
         // 任何标签都能关,包括最后一个(标签可拖拽换位后,"位置 0 不可关"这种按位置的限制已没意义);
-        // 全关掉只剩空面板也不要紧,顶部五个按钮随时能新建
+        // 全关掉只剩空面板也不要紧,顶部六个按钮随时能新建
         if (index >= 0) {
             tabbedPane.removeTabAt(index);
         }

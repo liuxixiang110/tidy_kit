@@ -1,6 +1,6 @@
 # Changelog
 
-全部时间按 2026-10-30 记。当前版本 `0.2.0`（条目仍全部记在同一节，不按版本细分）。
+全部时间按 2026-10-30 记（SQL 参数格式化一条按 2026-11-11 记）。当前版本 `0.3.0`（条目仍全部记在同一节，不按版本细分）。
 
 ## 0.1.0 — 2026-10-30
 
@@ -40,6 +40,18 @@
 - **XML 格式化**（`format/XmlFormatter`）：JDK DOM + identity Transformer，严格报错（带行列号），
   `FEATURE_SECURE_PROCESSING` + 关闭外部 DTD/实体加载，声明与 DOCTYPE 按原文补回。
 - **URL 编码/解码**（`codec/UrlCodec`）：RFC 3986 百分号编解码，固定 UTF-8，宽松解码。
+- **SQL 参数格式化**（2026-11-11，`sql` 包 + `ui/SqlParamPanel`，设计见
+  `docs/superpowers/specs/2026-11-11-sql-param-formatter-design.md`）：粘贴 GORM 调试日志
+  （或裸 SQL + 末尾反引号参数行），`参数格式化` 把 SQL 里的 `?` 逐个回填为参数，默认原样输出。
+  类型智能判定：双引号包裹转单引号字符串（先还原 Go 风格转义、内部单引号双写）、
+  纯数字与 null/true/false 原样、`<nil>` 转 null、其余兜底加单引号。
+  占位符与参数数量不匹配报错不出结果；引号串/反引号标识符/注释里的 `?` 不算占位符
+  （`SqlScan` 统一扫描口径，剥离启发式与绑定校验共用）。
+  裸 SQL 末尾反引号列表只在"独占一行"或"组数等于占位符数"时才剥下，防误剥标识符。
+  `美化SQL` 对结果做关键字换行 + 2 空格缩进（`SqlBeautifier` 启发式排版器：不改大小写、
+  只改空白，token 无损有单测硬判据；子查询/CASE 帧式缩进，行注释独占一行）。
+  按钮触发、无防抖、不做历史，与 HTML/XML/URL 同一取舍；面板布局宁可少量重复
+  也不把共用的 `TextFormatPanel` 改出 SQL 专属分支。
 - **多标签**：每类功能可开多个标签并存，各自独立状态；标签头带 `×` 关闭。
 - **标签整块都是选中热区**（仅 `×` 除外）：`ReorderableTabbedPane` 的标签头收到 `mousePressed` 就直接
   `setSelectedIndex`，并把 `JBUI.scale(6)` 的左右内边距算进标签头自身（tab 尺寸跟着标签头首选尺寸走）。
@@ -56,7 +68,7 @@
   现象就是换完序之后点其他标签不再切换选中。
   用手写拖拽而不用 AWT `DragSource`/`DropTarget`：传一个下标还得为它写 `Transferable`。
   代价：没有跟随鼠标的拖拽影像，拖的时候也看不出会插到哪。
-- 顶部按钮行：`JSON格式化` / `JSON对比` / `URL编码/解码` / `HTML格式化` / `XML格式化`。
+- 顶部按钮行：`JSON格式化` / `JSON对比` / `URL编码/解码` / `HTML格式化` / `XML格式化` / `SQL参数格式化`。
 - **兼容 JetBrains 全家桶**：`plugin.xml` 只依赖 `com.intellij.modules.platform`（删掉了
   `<depends>com.intellij.modules.java</depends>`），`build.gradle` 的 `intellij.plugins` 也去掉了
   `com.intellij.java` —— 没有 Java 插件参与编译，本身就是“不依赖它”的证明。
@@ -68,7 +80,9 @@
 - 100 个纯逻辑层单测（不启 IDE 即可跑），后续补到 104 个（新增 4 条覆盖 `toPrettyValueString`，
   其中一条拿"复制结果能被严格模式重新解析"当硬判据）；再加标签重排的下标用例后为 112 个；
   本轮查找与高亮补 `JsonTreeSearchTest`（14 条）+ `JsonHighlightTest`（7 条）到 133 个；
-  循环跳转再补 `JsonTreeFindCursorTest`（6 条），现为 139 个。
+  循环跳转再补 `JsonTreeFindCursorTest`（6 条），为 139 个；
+  SQL 参数格式化补 `SqlLogParserTest`（10 条）+ `SqlParameterBinderTest`（15 条）+
+  `SqlBeautifierTest`（17 条），现为 181 个。
 
 ### 变更
 
@@ -143,7 +157,9 @@
 
 - 编辑器内选中格式化未实现（早期设计的 B 入口，最终只保留工具窗口）。
 - 树内搜索（V1 明确 YAGNI 不做）。
-- HTML/XML/URL 无历史记录、无严格/宽松开关。
+- HTML/XML/URL/SQL 无历史记录、无严格/宽松开关。
+- SQL 参数内容本身含反引号时无法解析（GORM 日志也不转义它）；SQL 美化是启发式排版，
+  方言边角可能排得不完美，但保证 token 内容无损。
 - XML mixed content 空白不做特判；HTML 不规范化属性顺序/引号/大小写，不补 `tbody`/`head`。
 - URL 解码不支持 GBK 字符集，也不提供"把 `+` 当空格"的表单模式开关。
 - 无快捷键、无 Settings 页。

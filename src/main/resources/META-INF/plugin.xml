@@ -3,9 +3,21 @@
     <name>TidyKit</name>
     <vendor>you</vendor>
     <description><![CDATA[
-        Text formatting toolkit: JSON tree view with strict / lenient parsing and escaped-JSON extraction,
-        JSON diff, HTML / XML re-indenting and URL percent encode / decode.
-        All features open as tabs in one tool window, results one-click copyable.
+        文本格式化工具箱 / Text formatting toolkit.<br/>
+        所有功能以标签页承载于同一工具窗口，结果一键复制。All features open as tabs in one tool window, results one-click copyable.<br/>
+        <br/>
+        - JSON格式化：大纲风格树视图，严格/宽松解析，转义 JSON 自动解开，查找高亮，右键复制子树。<br/>
+        &nbsp;&nbsp;JSON Formatter: outline-style tree view, strict / lenient parsing, escaped-JSON extraction, search &amp; highlight, right-click subtree copy.<br/>
+        - JSON对比：按 key 路径做结构化语义比对，合成差异树，支持仅展示差异。<br/>
+        &nbsp;&nbsp;JSON Diff: structural comparison by key path, merged diff tree, show-differences-only filter.<br/>
+        - URL编码/解码：百分号编解码，固定 UTF-8，宽松解码。<br/>
+        &nbsp;&nbsp;URL Codec: percent encode / decode, fixed UTF-8, lenient decoding.<br/>
+        - HTML格式化：宽松重排缩进，属性顺序/引号/标签大小写照搬。<br/>
+        &nbsp;&nbsp;HTML Formatter: lenient re-indenting, keeps attribute order / quotes / tag case as-is.<br/>
+        - XML格式化：严格重排缩进，报错带行列号，安全处理不加载外部 DTD/实体。<br/>
+        &nbsp;&nbsp;XML Formatter: strict re-indenting with line / column errors, secure processing (no external DTD / entities).<br/>
+        - SQL参数格式化：GORM 日志参数回填 ? 占位符（智能加引号），可选关键字换行美化且内容无损。<br/>
+        &nbsp;&nbsp;SQL Param Formatter: bind GORM log parameters back into ? placeholders (smart quoting), optional keyword re-indenting that never changes token content.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>

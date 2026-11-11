@@ -66,7 +66,8 @@
 - FormatJsonInEditorAction:编辑器右键 + Ctrl+Alt+J,选中文本 -> Dialog 内嵌 JsonTreePanel;提供"原地替换为格式化文本"
 
 ### 5.5 标签容器 TidyKitTabs
-- 顶部五个按钮新建五类标签,各自独立状态;标签头 = 标题 + `×`(尺寸锁死,避免新 UI 的隐形宽热区误触)
+- 顶部六个按钮新建六类标签,各自独立状态;标签头 = 标题 + `×`(尺寸锁死,避免新 UI 的隐形宽热区误触)
+- SQL参数格式化(第六个入口):GORM 日志占位符回填 + 轻量美化,见 `2026-11-11-sql-param-formatter-design.md`
 - 任何标签都能关闭(含最后一个),不强制保留 —— 见 `2026-11-02-tidy-kit-tab-drag-reorder-design.md`
 - 标签头可拖拽换序:`ReorderableTabbedPane.moveTab(from, to)` 是唯一重排原语,拖拽只定目标、松手才改模型
   (鼠标还按着时改模型会断掉标签头的事件冒泡链);重排后的标签头是新建的,不复用刚被摘下的组件;顺序不持久化

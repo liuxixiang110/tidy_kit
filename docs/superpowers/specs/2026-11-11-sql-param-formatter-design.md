@@ -36,7 +36,7 @@
 ## 4. 架构
 
     src/main/java/com/tidy/kit/
-    |- sql/        SqlLogParser / SqlParameterBinder / SqlBeautifier / SqlException
+    |- sql/        SqlLogParser / SqlParameterBinder / SqlBeautifier / SqlScan / SqlException
     |- ui/         SqlParamPanel / TidyKitTabs(注册第六个按钮)
 
 `sql` 包与 `parse`/`compare`/`codec`/`format` 同级:不 import Swing 与 com.intellij,
@@ -59,7 +59,9 @@
 样例结构:`时间戳 [DEBUG] 文件:行 [DAO] - [OK / db.Select / 13.0ms] - [ SQL主体 ] - 参数列表`
 
 - 用输入中**最后一个** `] - ` 切分:右边是参数区;左边区域里取**最后一个** `- [` 之后、
-  切分点之前的文本为 SQL 主体(trim)。从后往前找是因为 SQL 里可能含 `]`(如 JSON 路径)
+  切分点之前的文本为 SQL 主体(trim)。从后往前找是因为 SQL 里可能含 `]`(如 JSON 路径)。
+  时间戳段(`[OK / db.Select / 13.0ms] - `)也含 `] - `,所以还要求**参数区以反引号开头**
+  才确认是带参日志;不满足则落到无参数日志/裸 SQL 分支
 - 无 `] - ` 但含 `- [` 且 trim 后以 `]` 结尾 → 视为无参数日志,SQL 取 `- [` 之后到结尾 `]` 之前
 - 两种都识别不出 → 按裸 SQL 形态处理(5.2)
 
@@ -90,11 +92,15 @@
 - 双引号串、反引号标识符
 - `--` 与 `#` 行注释、`/* */` 块注释
 
+扫描实现收在包私有 `SqlScan`(segments/countPlaceholders/literalEnd),
+5.2 的占位符统计与美化器的 token 切分共用同一口径,避免规则漂移;
+未闭合的引号/块注释视为延伸到输入末尾,不抛错(严格性由数量校验兜底)。
+
 样例 2 的 `'$.targetVer'`、`'null'`、`''` 等字面量不受影响。
 
 ### 6.2 数量校验
 
-占位符数 ≠ 参数数 → 抛错,消息带两边数量,如"SQL 有 7 个占位符,但参数只有 5 个"。
+占位符数 ≠ 参数数 → 抛错,消息带两边数量,如"SQL 有 7 个占位符,但参数有 5 个"。
 无占位符也无参数是合法场景,原样返回 SQL。
 
 ### 6.3 类型渲染(按序判定)
